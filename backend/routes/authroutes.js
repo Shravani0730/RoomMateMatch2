@@ -128,13 +128,17 @@ router.post("/login", async (req, res) => {
     db.query(sql, [email], async (err, results) => {
 
       if (err) {
-        console.error("Login database error:", err);
+  console.error("❌ LOGIN DATABASE ERROR");
+  console.error("Code:", err.code);
+  console.error("Message:", err.message);
+  console.error("SQL:", err.sql);
 
-        return res.status(500).json({
-          success: false,
-          message: "Database error"
-        });
-      }
+  return res.status(500).json({
+    success: false,
+    message: "Database error",
+    error: err.message
+  });
+}
 
       // User not found
       if (results.length === 0) {

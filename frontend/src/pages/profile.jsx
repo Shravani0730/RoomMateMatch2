@@ -1,16 +1,21 @@
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 function Profile() {
-  const savedProfile = JSON.parse(
-    localStorage.getItem("roommateProfile") || "null"
-  );
+  const navigate = useNavigate();
 
-  const defaultProfile = {
-    name: "Shravani",
-    role: "Student",
-    location: "Pune",
-    bio: "I am a student looking for a friendly, respectful and compatible roommate. I prefer a clean environment and peaceful study time while still enjoying social activities.",
+  const [profile, setProfile] = useState(null);
+  const [formData, setFormData] = useState(null);
+
+  const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // ======================================================
+  // DEFAULT PREFERENCES
+  // ======================================================
+
+  const defaultPreferences = {
     sleep: "Night Owl",
     cleanliness: "Very Clean",
     social: "Balanced",
@@ -19,47 +24,329 @@ function Profile() {
     guests: "Sometimes",
   };
 
-  const [profile, setProfile] = useState(
-    savedProfile || defaultProfile
-  );
+  // ======================================================
+  // LOAD PROFILE + PREFERENCES FROM DATABASE
+  // ======================================================
 
-  const [editMode, setEditMode] = useState(false);
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
 
-  const [formData, setFormData] = useState(profile);
+    if (!userId) {
+      navigate("/login");
+      return;
+    }
 
-  // Handle input changes
+    const loadProfile = async () => {
+      try {
+        setLoading(true);
+
+        // --------------------------------------------------
+        // LOAD USER
+        // --------------------------------------------------
+
+        const userResponse = await fetch(
+          `http://localhost:5000/api/users/${userId}`
+        );
+
+        const userData = await userResponse.json();
+
+        if (!userResponse.ok || !userData.success) {
+          alert(userData.message || "Unable to load profile.");
+          navigate("/login");
+          return;
+        }
+
+        const user = userData.user;
+
+        // --------------------------------------------------
+        // LOAD PREFERENCES FROM MYSQL
+        // --------------------------------------------------
+
+        const preferenceResponse = await fetch(
+          `http://localhost:5000/api/preferences/${userId}`
+        );
+
+        const preferenceData = await preferenceResponse.json();
+
+        let savedPreferences = {};
+
+        if (
+          preferenceResponse.ok &&
+          preferenceData.success &&
+          preferenceData.preferences
+        ) {
+          savedPreferences = preferenceData.preferences;
+        }
+
+        // --------------------------------------------------
+        // COMBINE USER + PREFERENCES
+        // --------------------------------------------------
+
+        const completeProfile = {
+          name: user.name || "",
+          role: user.role || "Student",
+          location: user.location || "",
+          bio: user.bio || "",
+
+          sleep:
+            savedPreferences.sleep || defaultPreferences.sleep,
+
+          cleanliness:
+            savedPreferences.cleanliness ||
+            defaultPreferences.cleanliness,
+
+          social:
+            savedPreferences.social ||
+            defaultPreferences.social,
+
+          food:
+            savedPreferences.food ||
+            defaultPreferences.food,
+
+          study:
+            savedPreferences.study ||
+            defaultPreferences.study,
+
+          guests:
+            savedPreferences.guests ||
+            defaultPreferences.guests,
+        };
+
+        setProfile(completeProfile);
+        setFormData(completeProfile);
+      } catch (error) {
+        console.error("❌ Profile loading error:", error);
+
+        alert(
+          "Cannot connect to server. Please make sure the backend is running."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, [navigate]);
+
+  // ======================================================
+  // HANDLE INPUT
+  // ======================================================
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData({
-      ...formData,
+    setFormData((previous) => ({
+      ...previous,
       [name]: value,
-    });
+    }));
   };
 
-  // Start editing
+  // ======================================================
+  // START EDITING
+  // ======================================================
+
   const handleEdit = () => {
-    setFormData(profile);
+    setFormData({ ...profile });
     setEditMode(true);
   };
 
-  // Save changes
-  const handleSave = () => {
-    setProfile(formData);
+  // ======================================================
+  // SAVE PROFILE + PREFERENCES
+  // ======================================================
 
-    localStorage.setItem(
-      "roommateProfile",
-      JSON.stringify(formData)
-    );
+  const handleSave = async () => {
+    const userId = localStorage.getItem("userId");
 
-    setEditMode(false);
+    if (!userId) {
+      alert("User session not found. Please login again.");
+      navigate("/login");
+      return;
+    }
+
+    if (!formData.name.trim()) {
+      alert("Please enter your name.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      // ==================================================
+      // 1. UPDATE USER PROFILE
+      // ==================================================
+
+      const userResponse = await fetch(
+        `http://localhost:5000/api/users/${userId}`,
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            name: formData.name,
+            role: formData.role,
+            location: formData.location,
+            bio: formData.bio,
+          }),
+        }
+      );
+
+      const userData = await userResponse.json();
+
+      if (!userResponse.ok || !userData.success) {
+        alert(
+          userData.message || "Unable to update profile."
+        );
+        return;
+      }
+
+      // ==================================================
+      // 2. UPDATE LIFESTYLE PREFERENCES IN MYSQL
+      // ==================================================
+
+      const preferenceResponse = await fetch(
+        `http://localhost:5000/api/preferences/${userId}`,
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            sleep: formData.sleep,
+            cleanliness: formData.cleanliness,
+            social: formData.social,
+            food: formData.food,
+            study: formData.study,
+            guests: formData.guests,
+          }),
+        }
+      );
+
+      const preferenceData = await preferenceResponse.json();
+
+      if (
+        !preferenceResponse.ok ||
+        !preferenceData.success
+      ) {
+        alert(
+          preferenceData.message ||
+            "Profile updated, but preferences could not be saved."
+        );
+        return;
+      }
+
+      // ==================================================
+      // 3. CREATE UPDATED PROFILE
+      // ==================================================
+
+      const updatedUser = userData.user;
+
+      const updatedPreferences =
+        preferenceData.preferences;
+
+      const updatedProfile = {
+        name: updatedUser.name || "",
+        role: updatedUser.role || "Student",
+        location: updatedUser.location || "",
+        bio: updatedUser.bio || "",
+
+        sleep:
+          updatedPreferences?.sleep ||
+          formData.sleep,
+
+        cleanliness:
+          updatedPreferences?.cleanliness ||
+          formData.cleanliness,
+
+        social:
+          updatedPreferences?.social ||
+          formData.social,
+
+        food:
+          updatedPreferences?.food ||
+          formData.food,
+
+        study:
+          updatedPreferences?.study ||
+          formData.study,
+
+        guests:
+          updatedPreferences?.guests ||
+          formData.guests,
+      };
+
+      // ==================================================
+      // 4. UPDATE REACT STATE
+      // ==================================================
+
+      setProfile(updatedProfile);
+      setFormData(updatedProfile);
+
+      // ==================================================
+      // 5. UPDATE USER LOCAL STORAGE
+      // ==================================================
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify(updatedUser)
+      );
+
+      // NOTE:
+      // Lifestyle preferences are NO LONGER stored
+      // in localStorage.
+      //
+      // They are stored in MySQL instead.
+
+      setEditMode(false);
+
+      alert("Profile and preferences updated successfully! ❤️");
+    } catch (error) {
+      console.error("❌ Profile update error:", error);
+
+      alert(
+        "Cannot connect to server. Please make sure the backend is running."
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
-  // Cancel editing
+  // ======================================================
+  // CANCEL
+  // ======================================================
+
   const handleCancel = () => {
-    setFormData(profile);
+    setFormData({ ...profile });
     setEditMode(false);
   };
+
+  // ======================================================
+  // LOADING
+  // ======================================================
+
+  if (loading) {
+    return (
+      <div className="dashboard-loading">
+        <h2>Loading your profile... 💕</h2>
+      </div>
+    );
+  }
+
+  // ======================================================
+  // NO PROFILE
+  // ======================================================
+
+  if (!profile || !formData) {
+    return null;
+  }
+
+  // ======================================================
+  // UI
+  // ======================================================
 
   return (
     <div className="inner-page">
@@ -68,11 +355,17 @@ function Profile() {
 
       <header className="inner-navbar">
 
-        <Link to="/" className="dashboard-logo">
+        <Link
+          to="/"
+          className="dashboard-logo"
+        >
           🏠 <span>RoomMate</span> Match
         </Link>
 
-        <Link to="/dashboard" className="nav-back">
+        <Link
+          to="/dashboard"
+          className="nav-back"
+        >
           ← Dashboard
         </Link>
 
@@ -96,11 +389,15 @@ function Profile() {
             </span>
 
             {!editMode ? (
+
               <>
-                <h1>{profile.name}</h1>
+                <h1>
+                  {profile.name}
+                </h1>
 
                 <p>
-                  🎓 {profile.role} • 📍 {profile.location}
+                  🎓 {profile.role} • 📍{" "}
+                  {profile.location || "Location not added"}
                 </p>
 
                 <div className="profile-actions">
@@ -115,7 +412,9 @@ function Profile() {
 
                 </div>
               </>
+
             ) : (
+
               <div className="profile-edit-form">
 
                 {/* NAME */}
@@ -171,14 +470,18 @@ function Profile() {
                     type="button"
                     className="save-profile-btn"
                     onClick={handleSave}
+                    disabled={saving}
                   >
-                    💾 Save Changes
+                    {saving
+                      ? "💾 Saving..."
+                      : "💾 Save Changes"}
                   </button>
 
                   <button
                     type="button"
                     className="cancel-profile-btn"
                     onClick={handleCancel}
+                    disabled={saving}
                   >
                     Cancel
                   </button>
@@ -200,11 +503,19 @@ function Profile() {
           <div className="section-title-row">
 
             <div>
-              <span>LIFESTYLE</span>
-              <h2>My Preferences</h2>
+
+              <span>
+                LIFESTYLE
+              </span>
+
+              <h2>
+                My Preferences
+              </h2>
+
             </div>
 
             {!editMode && (
+
               <button
                 type="button"
                 className="edit-preferences"
@@ -212,6 +523,7 @@ function Profile() {
               >
                 ✏️ Edit Preferences
               </button>
+
             )}
 
           </div>
@@ -224,33 +536,63 @@ function Profile() {
             <div className="profile-preferences">
 
               <div>
-                <span>🌙 Sleep Schedule</span>
-                <strong>{profile.sleep}</strong>
+                <span>
+                  🌙 Sleep Schedule
+                </span>
+
+                <strong>
+                  {profile.sleep}
+                </strong>
               </div>
 
               <div>
-                <span>🧹 Cleanliness</span>
-                <strong>{profile.cleanliness}</strong>
+                <span>
+                  🧹 Cleanliness
+                </span>
+
+                <strong>
+                  {profile.cleanliness}
+                </strong>
               </div>
 
               <div>
-                <span>🎉 Social Life</span>
-                <strong>{profile.social}</strong>
+                <span>
+                  🎉 Social Life
+                </span>
+
+                <strong>
+                  {profile.social}
+                </strong>
               </div>
 
               <div>
-                <span>🍳 Food</span>
-                <strong>{profile.food}</strong>
+                <span>
+                  🍳 Food
+                </span>
+
+                <strong>
+                  {profile.food}
+                </strong>
               </div>
 
               <div>
-                <span>📚 Study Environment</span>
-                <strong>{profile.study}</strong>
+                <span>
+                  📚 Study Environment
+                </span>
+
+                <strong>
+                  {profile.study}
+                </strong>
               </div>
 
               <div>
-                <span>🏠 Guests</span>
-                <strong>{profile.guests}</strong>
+                <span>
+                  🏠 Guests
+                </span>
+
+                <strong>
+                  {profile.guests}
+                </strong>
               </div>
 
             </div>
@@ -435,7 +777,6 @@ function Profile() {
               </div>
 
             </div>
-
           )}
 
         </section>
@@ -453,11 +794,10 @@ function Profile() {
             A little about me
           </h2>
 
-
           {!editMode ? (
 
             <p className="profile-bio">
-              {profile.bio}
+              {profile.bio || "No bio added yet."}
             </p>
 
           ) : (
@@ -490,8 +830,8 @@ function Profile() {
           <section className="profile-save-section">
 
             <p>
-              ✨ Make sure your profile information is correct
-              before saving.
+              ✨ Make sure your profile information is
+              correct before saving.
             </p>
 
             <div className="edit-buttons">
@@ -500,14 +840,18 @@ function Profile() {
                 type="button"
                 className="save-profile-btn"
                 onClick={handleSave}
+                disabled={saving}
               >
-                💾 Save All Changes
+                {saving
+                  ? "💾 Saving..."
+                  : "💾 Save All Changes"}
               </button>
 
               <button
                 type="button"
                 className="cancel-profile-btn"
                 onClick={handleCancel}
+                disabled={saving}
               >
                 Cancel
               </button>

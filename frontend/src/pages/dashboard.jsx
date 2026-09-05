@@ -1,21 +1,331 @@
-import { Link } from "react-router-dom";
-import { matches } from "../data/mockdata";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 function Dashboard() {
+  const navigate = useNavigate();
+
+  const [user, setUser] = useState(null);
+  const [preferences, setPreferences] = useState(null);
+  const [matches, setMatches] = useState([]);
+  const [connectedRoommates, setConnectedRoommates] = useState([]);
+
+  const [messageCount, setMessageCount] = useState(0);
+
+  const [loading, setLoading] = useState(true);
+  const [matchesLoading, setMatchesLoading] = useState(true);
+  const [connectionsLoading, setConnectionsLoading] = useState(true);
+  const [messagesLoading, setMessagesLoading] = useState(true);
+
+  const userId = localStorage.getItem("userId");
+
+  // =====================================================
+  // LOAD ALL DASHBOARD DATA
+  // =====================================================
+
+  useEffect(() => {
+    if (!userId) {
+      navigate("/login");
+      return;
+    }
+
+    loadDashboard();
+  }, [userId, navigate]);
+
+  const loadDashboard = async () => {
+    try {
+      setLoading(true);
+
+      // -------------------------------------------------
+      // USER
+      // -------------------------------------------------
+
+      const userResponse = await fetch(
+        `http://localhost:5000/api/users/${userId}`
+      );
+
+      if (!userResponse.ok) {
+        throw new Error("Unable to load user");
+      }
+
+      const userData = await userResponse.json();
+
+      if (!userData.success || !userData.user) {
+        localStorage.removeItem("userId");
+        navigate("/login");
+        return;
+      }
+
+      setUser(userData.user);
+
+      // -------------------------------------------------
+      // PREFERENCES
+      // -------------------------------------------------
+
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/preferences/${userId}`
+        );
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          setPreferences(data.preferences || null);
+        } else {
+          setPreferences(null);
+        }
+      } catch (error) {
+        console.error("Preferences error:", error);
+        setPreferences(null);
+      }
+
+      // -------------------------------------------------
+      // MATCHES
+      // -------------------------------------------------
+
+      loadMatches();
+
+      // -------------------------------------------------
+      // CONNECTIONS
+      // -------------------------------------------------
+
+      loadConnectedRoommates();
+
+      // -------------------------------------------------
+      // MESSAGES
+      // -------------------------------------------------
+
+      loadMessageCount();
+    } catch (error) {
+      console.error("Dashboard error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =====================================================
+  // LOAD MATCHES
+  // =====================================================
+
+  const loadMatches = async () => {
+    try {
+      setMatchesLoading(true);
+
+      const response = await fetch(
+        `http://localhost:5000/api/matches/${userId}`
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setMatches(data.matches || []);
+      } else {
+        setMatches([]);
+      }
+    } catch (error) {
+      console.error("Matches error:", error);
+      setMatches([]);
+    } finally {
+      setMatchesLoading(false);
+    }
+  };
+
+  // =====================================================
+  // LOAD CONNECTED ROOMMATES
+  // =====================================================
+
+  const loadConnectedRoommates = async () => {
+    try {
+      setConnectionsLoading(true);
+
+      const response = await fetch(
+        `http://localhost:5000/api/connections/${userId}`
+      );
+
+      const data = await response.json();
+
+      console.log("Dashboard connections:", data);
+
+      if (!response.ok || !data.success) {
+        setConnectedRoommates([]);
+        return;
+      }
+
+      // -------------------------------------------------
+      // ONLY ACCEPTED CONNECTIONS
+      // -------------------------------------------------
+
+      const acceptedConnections = (
+        data.connections || []
+      ).filter(
+        (connection) =>
+          String(connection.status).toLowerCase() ===
+          "accepted"
+      );
+
+      // -------------------------------------------------
+      // GET OTHER USER ID
+      // -------------------------------------------------
+
+      const otherUserIds = acceptedConnections
+        .map((connection) => {
+          const senderId = Number(connection.sender_id);
+          const receiverId = Number(connection.receiver_id);
+          const currentId = Number(userId);
+
+          if (senderId === currentId) {
+            return receiverId;
+          }
+
+          if (receiverId === currentId) {
+            return senderId;
+          }
+
+          return null;
+        })
+        .filter(Boolean);
+
+      // -------------------------------------------------
+      // REMOVE DUPLICATES
+      // -------------------------------------------------
+
+      const uniqueUserIds = [
+        ...new Set(otherUserIds),
+      ];
+
+      // -------------------------------------------------
+      // GET USER DETAILS
+      // -------------------------------------------------
+
+      const roommateResults = await Promise.all(
+        uniqueUserIds.map(async (roommateId) => {
+          try {
+            const response = await fetch(
+              `http://localhost:5000/api/users/${roommateId}`
+            );
+
+            if (!response.ok) {
+              return null;
+            }
+
+            const data = await response.json();
+
+            if (data.success && data.user) {
+              return data.user;
+            }
+
+            return null;
+          } catch (error) {
+            console.error(
+              `Failed to load roommate ${roommateId}:`,
+              error
+            );
+
+            return null;
+          }
+        })
+      );
+
+      setConnectedRoommates(
+        roommateResults.filter(Boolean)
+      );
+    } catch (error) {
+      console.error(
+        "Connected roommates error:",
+        error
+      );
+
+      setConnectedRoommates([]);
+    } finally {
+      setConnectionsLoading(false);
+    }
+  };
+
+  // =====================================================
+  // LOAD MESSAGE COUNT
+  // =====================================================
+
+  const loadMessageCount = async () => {
+    try {
+      setMessagesLoading(true);
+
+      const response = await fetch(
+        `http://localhost:5000/api/chat/count/${userId}`
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setMessageCount(Number(data.count) || 0);
+      } else {
+        setMessageCount(0);
+      }
+    } catch (error) {
+      console.error("Messages count error:", error);
+      setMessageCount(0);
+    } finally {
+      setMessagesLoading(false);
+    }
+  };
+
+  // =====================================================
+  // LOADING
+  // =====================================================
+
+  if (loading) {
+    return (
+      <div className="dashboard-loading">
+        <div className="connected-loading-icon">
+          💕
+        </div>
+
+        <h2>Loading your dashboard...</h2>
+
+        <p>
+          Getting everything ready for you.
+        </p>
+      </div>
+    );
+  }
+
+  // =====================================================
+  // USER NOT FOUND
+  // =====================================================
+
+  if (!user) {
+    return null;
+  }
+
+  // =====================================================
+  // DASHBOARD VALUES
+  // =====================================================
+
+  const bestMatch =
+    matches.length > 0
+      ? Number(matches[0].compatibility) || 0
+      : 0;
+
+  // =====================================================
+  // RENDER
+  // =====================================================
+
   return (
     <div className="dashboard-page">
 
-      {/* ================= NAVBAR ================= */}
+      {/* =================================================
+          NAVBAR
+      ================================================= */}
 
       <header className="dashboard-navbar">
 
-        <Link to="/" className="dashboard-logo">
+        <Link
+          to="/"
+          className="dashboard-logo"
+        >
           🏠 <span>RoomMate</span> Match
         </Link>
 
         <div className="dashboard-nav-right">
 
-          {/* NOTIFICATIONS */}
           <Link
             to="/notifications"
             className="notification"
@@ -24,33 +334,41 @@ function Dashboard() {
             🔔
           </Link>
 
-          {/* PROFILE */}
           <Link
             to="/profile"
             className="dashboard-user"
             title="My Profile"
           >
+
             <div className="dashboard-avatar">
               👩🏻
             </div>
 
             <div>
-              <strong>Shravani</strong>
-              <span>Student</span>
+              <strong>
+                {user.name}
+              </strong>
+
+              <span>
+                {user.role || "Student"}
+              </span>
             </div>
+
           </Link>
 
         </div>
 
       </header>
 
-
-      {/* ================= CONTENT ================= */}
+      {/* =================================================
+          MAIN
+      ================================================= */}
 
       <main className="dashboard-content">
 
-
-        {/* ================= WELCOME ================= */}
+        {/* =================================================
+            WELCOME
+        ================================================= */}
 
         <section className="dashboard-welcome">
 
@@ -61,11 +379,12 @@ function Dashboard() {
             </span>
 
             <h1>
-              Hi Shravani! 👋
+              Hi {user.name}! 👋
             </h1>
 
             <p>
-              Here's what's happening with your roommate search.
+              Here's what's happening with your
+              roommate search.
             </p>
 
           </div>
@@ -79,10 +398,13 @@ function Dashboard() {
 
         </section>
 
-
-        {/* ================= STATS ================= */}
+        {/* =================================================
+            STATS
+        ================================================= */}
 
         <section className="dashboard-stats">
+
+          {/* BEST COMPATIBILITY */}
 
           <div className="dashboard-stat-card">
 
@@ -91,17 +413,22 @@ function Dashboard() {
             </div>
 
             <div>
+
               <span>
-                Compatibility
+                Best Compatibility
               </span>
 
               <strong>
-                92%
+                {matchesLoading
+                  ? "..."
+                  : `${bestMatch}%`}
               </strong>
+
             </div>
 
           </div>
 
+          {/* POTENTIAL MATCHES */}
 
           <div className="dashboard-stat-card">
 
@@ -110,17 +437,22 @@ function Dashboard() {
             </div>
 
             <div>
+
               <span>
                 Potential Matches
               </span>
 
               <strong>
-                {matches.length}
+                {matchesLoading
+                  ? "..."
+                  : matches.length}
               </strong>
+
             </div>
 
           </div>
 
+          {/* MESSAGES */}
 
           <div className="dashboard-stat-card">
 
@@ -129,21 +461,166 @@ function Dashboard() {
             </div>
 
             <div>
+
               <span>
                 Messages
               </span>
 
               <strong>
-                3
+                {messagesLoading
+                  ? "..."
+                  : messageCount}
               </strong>
+
             </div>
 
           </div>
 
         </section>
 
+        {/* =================================================
+            CONNECTED ROOMMATES
+        ================================================= */}
 
-        {/* ================= MATCHES ================= */}
+        <section className="connected-dashboard-section">
+
+          <div className="connected-dashboard-heading">
+
+            <div>
+
+              <span>
+                💕 YOUR CONNECTIONS
+              </span>
+
+              <h2>
+                Connected Roommates
+              </h2>
+
+              <p>
+                View the roommates you've connected
+                with and start a conversation.
+              </p>
+
+            </div>
+
+            {connectedRoommates.length > 0 && (
+              <Link
+                to="/connected"
+                className="view-all-btn"
+              >
+                View all →
+              </Link>
+            )}
+
+          </div>
+
+          {/* CONNECTION LOADING */}
+
+          {connectionsLoading && (
+            <div className="dashboard-loading-small">
+
+              <div>
+                💕
+              </div>
+
+              <p>
+                Loading your connections...
+              </p>
+
+            </div>
+          )}
+
+          {/* NO CONNECTIONS */}
+
+          {!connectionsLoading &&
+            connectedRoommates.length === 0 && (
+              <div className="connected-dashboard-empty">
+
+                <div className="connected-dashboard-icon">
+                  💕
+                </div>
+
+                <h3>
+                  No connected roommates yet
+                </h3>
+
+                <p>
+                  Connect with a potential roommate
+                  and accepted connections will
+                  appear here.
+                </p>
+
+                <Link
+                  to="/matches"
+                  className="dashboard-quiz-btn"
+                >
+                  Find Roommates →
+                </Link>
+
+              </div>
+            )}
+
+          {/* CONNECTED ROOMMATES */}
+
+          {!connectionsLoading &&
+            connectedRoommates.length > 0 && (
+              <div className="connected-dashboard-grid">
+
+                {connectedRoommates
+                  .slice(0, 3)
+                  .map((roommate) => (
+                    <div
+                      className="connected-dashboard-card"
+                      key={roommate.id}
+                    >
+
+                      <div className="connected-dashboard-avatar">
+                        👩🏻
+                      </div>
+
+                      <div className="connected-dashboard-info">
+
+                        <div className="connected-status">
+                          <span></span>
+                          Connected
+                        </div>
+
+                        <h3>
+                          {roommate.name ||
+                            "Roommate"}
+                        </h3>
+
+                        <p>
+                          {roommate.role ||
+                            "Student"}
+                        </p>
+
+                        <small>
+                          📍{" "}
+                          {roommate.location ||
+                            "Location not added"}
+                        </small>
+
+                      </div>
+
+                      <Link
+                        to={`/chat?userId=${roommate.id}`}
+                        className="connected-chat-btn"
+                      >
+                        💬 Chat
+                      </Link>
+
+                    </div>
+                  ))}
+
+              </div>
+            )}
+
+        </section>
+
+        {/* =================================================
+            BEST MATCHES
+        ================================================= */}
 
         <section className="matches-section">
 
@@ -170,103 +647,165 @@ function Dashboard() {
 
           </div>
 
+          {/* MATCH LOADING */}
 
-          <div className="match-grid">
+          {matchesLoading && (
+            <div className="dashboard-loading-small">
 
-            {matches.slice(0, 3).map((match, index) => (
+              <p>
+                Finding your best roommates... 💕
+              </p>
 
-              <div
-                className="match-card"
-                key={match.id}
-              >
+            </div>
+          )}
 
-                {/* CARD TOP */}
+          {/* NO MATCHES */}
 
-                <div className="match-card-top">
+          {!matchesLoading &&
+            matches.length === 0 && (
+              <div className="dashboard-empty">
 
-                  <div
-                    className={`match-avatar ${
-                      index === 1
-                        ? "blue-avatar"
-                        : index === 2
-                        ? "purple-avatar"
-                        : ""
-                    }`}
-                  >
-                    {match.avatar}
-                  </div>
-
-
-                  <div className="match-percentage">
-
-                    <strong>
-                      {match.compatibility}%
-                    </strong>
-
-                    <span>
-                      Compatible
-                    </span>
-
-                  </div>
-
+                <div>
+                  💕
                 </div>
-
-
-                {/* USER INFO */}
 
                 <h3>
-                  {match.name}, {match.age}
+                  No matches yet
                 </h3>
 
-                <p className="match-location">
-                  📍 {match.location} • {match.role}
+                <p>
+                  Complete your lifestyle preferences
+                  to find compatible roommates.
                 </p>
 
-
-                {/* TAGS */}
-
-                <div className="match-tags">
-
-                  {match.sleep && (
-                    <span>
-                      🌙 {match.sleep}
-                    </span>
-                  )}
-
-                  {match.cleanliness && (
-                    <span>
-                      🧹 {match.cleanliness}
-                    </span>
-                  )}
-
-                  {match.social && (
-                    <span>
-                      🎉 {match.social}
-                    </span>
-                  )}
-
-                </div>
-
-
-                {/* BUTTON */}
-
                 <Link
-                  to={`/matches/${match.id}`}
-                  className="match-profile-btn"
+                  to="/quiz"
+                  className="dashboard-quiz-btn"
                 >
-                  View Compatibility →
+                  ✨ Complete Quiz
                 </Link>
 
               </div>
+            )}
 
-            ))}
+          {/* MATCHES */}
 
-          </div>
+          {!matchesLoading &&
+            matches.length > 0 && (
+              <div className="match-grid">
+
+                {matches
+                  .slice(0, 3)
+                  .map((match, index) => (
+                    <div
+                      className="match-card"
+                      key={match.id}
+                    >
+
+                      <div className="match-card-top">
+
+                        <div
+                          className={`match-avatar ${
+                            index === 1
+                              ? "blue-avatar"
+                              : index === 2
+                                ? "purple-avatar"
+                                : ""
+                          }`}
+                        >
+                          👩🏻
+                        </div>
+
+                        <div className="match-percentage">
+
+                          <strong>
+                            {Number(
+                              match.compatibility
+                            ) || 0}
+                            %
+                          </strong>
+
+                          <span>
+                            Compatible
+                          </span>
+
+                        </div>
+
+                      </div>
+
+                      <h3>
+                        {match.name ||
+                          "Roommate"}
+                      </h3>
+
+                      <p className="match-location">
+                        📍{" "}
+                        {match.location ||
+                          "Location not added"}
+                        {" • "}
+                        {match.role ||
+                          "Student"}
+                      </p>
+
+                      <p className="match-bio">
+                        {match.bio ||
+                          "Looking for a compatible roommate."}
+                      </p>
+
+                      <div className="match-tags">
+
+                        {match.preferences?.sleep && (
+                          <span>
+                            🌙{" "}
+                            {match.preferences.sleep}
+                          </span>
+                        )}
+
+                        {match.preferences?.cleanliness && (
+                          <span>
+                            🧹{" "}
+                            {match.preferences.cleanliness}
+                          </span>
+                        )}
+
+                        {match.preferences?.social && (
+                          <span>
+                            🎉{" "}
+                            {match.preferences.social}
+                          </span>
+                        )}
+
+                      </div>
+
+                      <div className="match-score-info">
+
+                        <span>
+                          {match.matchedCategories || 0}
+                          {" "}of{" "}
+                          {match.totalCategories || 6}
+                          {" "}preferences matched
+                        </span>
+
+                      </div>
+
+                      <Link
+                        to={`/matches/${match.id}`}
+                        className="match-profile-btn"
+                      >
+                        View Compatibility →
+                      </Link>
+
+                    </div>
+                  ))}
+
+              </div>
+            )}
 
         </section>
 
-
-        {/* ================= LIFESTYLE ================= */}
+        {/* =================================================
+            YOUR LIFESTYLE
+        ================================================= */}
 
         <section className="lifestyle-section">
 
@@ -285,7 +824,7 @@ function Dashboard() {
             </div>
 
             <Link
-              to="/profile"
+              to="/quiz"
               className="edit-preferences"
             >
               ✏️ Edit Preferences
@@ -293,43 +832,198 @@ function Dashboard() {
 
           </div>
 
-
           <div className="lifestyle-grid">
 
             <div>
-              <span>🌙 Sleep Schedule</span>
-              <strong>Night Owl</strong>
+
+              <span>
+                🌙 Sleep Schedule
+              </span>
+
+              <strong>
+                {preferences?.sleep ||
+                  "Not added"}
+              </strong>
+
             </div>
 
             <div>
-              <span>🧹 Cleanliness</span>
-              <strong>Very Clean</strong>
+
+              <span>
+                🧹 Cleanliness
+              </span>
+
+              <strong>
+                {preferences?.cleanliness ||
+                  "Not added"}
+              </strong>
+
             </div>
 
             <div>
-              <span>🎉 Social Life</span>
-              <strong>Balanced</strong>
+
+              <span>
+                🎉 Social Life
+              </span>
+
+              <strong>
+                {preferences?.social ||
+                  "Not added"}
+              </strong>
+
             </div>
 
             <div>
-              <span>🍳 Food</span>
-              <strong>Cooking</strong>
+
+              <span>
+                🍳 Food
+              </span>
+
+              <strong>
+                {preferences?.food ||
+                  "Not added"}
+              </strong>
+
             </div>
 
             <div>
-              <span>📚 Study Environment</span>
-              <strong>Very Quiet</strong>
+
+              <span>
+                📚 Study Environment
+              </span>
+
+              <strong>
+                {preferences?.study ||
+                  "Not added"}
+              </strong>
+
             </div>
 
             <div>
-              <span>🏠 Guests</span>
-              <strong>Sometimes</strong>
+
+              <span>
+                🏠 Guests
+              </span>
+
+              <strong>
+                {preferences?.guests ||
+                  "Not added"}
+              </strong>
+
             </div>
 
           </div>
 
         </section>
 
+        {/* =================================================
+            YOUR PROFILE
+        ================================================= */}
+
+        <section className="lifestyle-section">
+
+          <div className="section-title-row">
+
+            <div>
+
+              <span>
+                YOUR PROFILE
+              </span>
+
+              <h2>
+                My Information
+              </h2>
+
+            </div>
+
+            <Link
+              to="/profile"
+              className="edit-preferences"
+            >
+              ✏️ Edit Profile
+            </Link>
+
+          </div>
+
+          <div className="lifestyle-grid">
+
+            <div>
+
+              <span>
+                👤 Name
+              </span>
+
+              <strong>
+                {user.name}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                📧 Email
+              </span>
+
+              <strong>
+                {user.email}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                🎓 Role
+              </span>
+
+              <strong>
+                {user.role || "Student"}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                📍 Location
+              </span>
+
+              <strong>
+                {user.location ||
+                  "Not added"}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                📝 Bio
+              </span>
+
+              <strong>
+                {user.bio ||
+                  "No bio added yet"}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                ✨ Profile Status
+              </span>
+
+              <strong>
+                Complete
+              </strong>
+
+            </div>
+
+          </div>
+
+        </section>
 
       </main>
 

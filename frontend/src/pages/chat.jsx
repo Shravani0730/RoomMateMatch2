@@ -1,180 +1,452 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import {
+  Link,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 
 function Chat() {
-  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const [messages, setMessages] = useState([
-    {
-      sender: "them",
-      text: "Hey! I saw that we have a 94% compatibility match 😊",
-      time: "10:20 AM",
-    },
-    {
-      sender: "me",
-      text: "Yes! Our lifestyle preferences seem really similar.",
-      time: "10:22 AM",
-    },
-    {
-      sender: "them",
-      text: "I noticed we both prefer a clean and peaceful place.",
-      time: "10:23 AM",
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
+  const [messageText, setMessageText] = useState("");
 
-  const sendMessage = () => {
-    const trimmedMessage = message.trim();
+  const [otherUser, setOtherUser] = useState(null);
 
-    if (!trimmedMessage) {
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+
+  // =====================================================
+  // GET CHAT USER
+  // =====================================================
+
+  const getChatUserId = () => {
+    const urlUserId = searchParams.get("userId");
+
+    if (urlUserId) {
+      localStorage.setItem("chatUserId", urlUserId);
+      return urlUserId;
+    }
+
+    return localStorage.getItem("chatUserId");
+  };
+
+  // =====================================================
+  // LOAD CHAT
+  // =====================================================
+
+  useEffect(() => {
+    const load = async () => {
+      const userId = localStorage.getItem("userId");
+      const chatUserId = getChatUserId();
+
+      console.log("========== CHAT ==========");
+      console.log("Current User:", userId);
+      console.log("Chat User:", chatUserId);
+      console.log("==========================");
+
+      // No logged-in user
+      if (!userId) {
+        navigate("/login");
+        return;
+      }
+
+      // No roommate selected
+      if (!chatUserId) {
+        setError("No roommate selected.");
+        setLoading(false);
+        return;
+      }
+
+      await loadChat(
+        Number(userId),
+        Number(chatUserId)
+      );
+    };
+
+    load();
+  }, [navigate, searchParams]);
+
+  // =====================================================
+  // LOAD CHAT DATA
+  // =====================================================
+
+  const loadChat = async (userId, chatUserId) => {
+    try {
+      setLoading(true);
+      setError("");
+
+      // -------------------------------------------------
+      // GET OTHER USER
+      // -------------------------------------------------
+
+      const userResponse = await fetch(
+        `http://localhost:5000/api/users/${chatUserId}`
+      );
+
+      if (!userResponse.ok) {
+        throw new Error("Could not load roommate profile.");
+      }
+
+      const userData = await userResponse.json();
+
+      console.log("Roommate:", userData);
+
+      if (
+        !userData.success ||
+        !userData.user
+      ) {
+        throw new Error("Roommate profile not found.");
+      }
+
+      setOtherUser(userData.user);
+
+      // -------------------------------------------------
+      // GET MESSAGES
+      // -------------------------------------------------
+
+      const messagesResponse = await fetch(
+        `http://localhost:5000/api/chat/${userId}/${chatUserId}`
+      );
+
+      if (!messagesResponse.ok) {
+        throw new Error("Could not load messages.");
+      }
+
+      const messagesData =
+        await messagesResponse.json();
+
+      console.log("Messages:", messagesData);
+
+      if (messagesData.success) {
+        setMessages(
+          messagesData.messages || []
+        );
+      } else {
+        setMessages([]);
+      }
+
+    } catch (err) {
+      console.error("Chat error:", err);
+
+      setError(
+        err.message ||
+          "Unable to open chat."
+      );
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =====================================================
+  // SEND MESSAGE
+  // =====================================================
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+
+    const userId =
+      localStorage.getItem("userId");
+
+    const chatUserId =
+      localStorage.getItem("chatUserId");
+
+    const cleanMessage =
+      messageText.trim();
+
+    if (!cleanMessage) {
       return;
     }
 
-    setMessages([
-      ...messages,
-      {
-        sender: "me",
-        text: trimmedMessage,
-        time: "Just now",
-      },
-    ]);
+    if (!userId || !chatUserId) {
+      alert("Chat information is missing.");
+      return;
+    }
 
-    setMessage("");
-  };
+    try {
+      setSending(true);
 
-  const handleKeyDown = (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      sendMessage();
+      const response = await fetch(
+        "http://localhost:5000/api/chat",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            sender_id: Number(userId),
+            receiver_id: Number(chatUserId),
+            message: cleanMessage,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      console.log(
+        "Send message response:",
+        data
+      );
+
+      if (!response.ok || !data.success) {
+        throw new Error(
+          data.message ||
+            "Message could not be sent."
+        );
+      }
+
+      // Add new message immediately
+      if (data.chat) {
+        setMessages((previous) => [
+          ...previous,
+          data.chat,
+        ]);
+      }
+
+      setMessageText("");
+
+    } catch (err) {
+      console.error(
+        "Send message error:",
+        err
+      );
+
+      alert(
+        err.message ||
+          "Unable to send message."
+      );
+
+    } finally {
+      setSending(false);
     }
   };
+
+  // =====================================================
+  // LOADING SCREEN
+  // =====================================================
+
+  if (loading) {
+    return (
+      <div className="chat-page">
+        <div className="chat-loading">
+
+          <div className="no-messages-icon">
+            💕
+          </div>
+
+          <h2>
+            Opening your chat...
+          </h2>
+
+          <p>
+            Loading your roommate conversation.
+          </p>
+
+        </div>
+      </div>
+    );
+  }
+
+  // =====================================================
+  // ERROR SCREEN
+  // =====================================================
+
+  if (error || !otherUser) {
+    return (
+      <div className="chat-page">
+
+        <div className="chat-unavailable">
+
+          <div className="no-messages-icon">
+            💔
+          </div>
+
+          <h2>
+            Chat unavailable
+          </h2>
+
+          <p>
+            {error ||
+              "Please select a roommate first."}
+          </p>
+
+          <Link
+            to="/matches"
+            className="chat-back-button"
+          >
+            ← Back to Matches
+          </Link>
+
+        </div>
+
+      </div>
+    );
+  }
+
+  // =====================================================
+  // CURRENT USER
+  // =====================================================
+
+  const currentUserId = Number(
+    localStorage.getItem("userId")
+  );
+
+  // =====================================================
+  // CHAT UI
+  // =====================================================
 
   return (
     <div className="chat-page">
 
+      {/* ============================================= */}
       {/* HEADER */}
+      {/* ============================================= */}
 
       <header className="chat-header">
 
-        <Link to="/matches" className="chat-back">
-          ← Back to Matches
+        <Link
+          to="/matches"
+          className="chat-back"
+        >
+          ←
         </Link>
 
-        <div className="chat-user">
-
-          <div className="chat-avatar">
-            👩🏻
-          </div>
-
-          <div>
-            <h2>Priya Sharma</h2>
-            <p>
-              🟢 Online • 94% Compatible
-            </p>
-          </div>
-
+        <div className="chat-user-avatar">
+          👩🏻
         </div>
 
-        <Link
-          to="/matches/1"
-          className="chat-profile-btn"
-        >
-          View Profile
-        </Link>
+        <div className="chat-user-info">
 
-      </header>
-
-
-      {/* CHAT AREA */}
-
-      <main className="chat-container">
-
-        <div className="chat-intro">
-
-          <div className="chat-intro-avatar">
-            👩🏻
-          </div>
-
-          <h3>Priya Sharma</h3>
-
-          <p>
-            Student • Pune
-          </p>
+          <h2>
+            {otherUser.name || "Roommate"}
+          </h2>
 
           <span>
-            You matched with Priya at 94% compatibility ❤️
+            {otherUser.role || "Student"}
           </span>
 
         </div>
 
+      </header>
 
-        {/* MESSAGES */}
+      {/* ============================================= */}
+      {/* MESSAGES */}
+      {/* ============================================= */}
 
-        <div className="messages-container">
+      <main className="chat-messages">
 
-          {messages.map((item, index) => (
+        {messages.length === 0 ? (
 
-            <div
-              key={index}
-              className={`message-row ${
-                item.sender === "me"
-                  ? "my-message"
-                  : "their-message"
-              }`}
-            >
+          <div className="no-messages">
 
-              {item.sender === "them" && (
-                <div className="message-avatar">
-                  👩🏻
-                </div>
-              )}
-
-              <div className="message-wrapper">
-
-                <div className="message-bubble">
-                  {item.text}
-                </div>
-
-                <span className="message-time">
-                  {item.time}
-                </span>
-
-              </div>
-
+            <div className="no-messages-icon">
+              💕
             </div>
 
-          ))}
+            <h3>
+              Start a conversation
+            </h3>
 
-        </div>
+            <p>
+              Say hello to{" "}
+              {otherUser.name ||
+                "your potential roommate"}!
+            </p>
 
+          </div>
 
-        {/* MESSAGE INPUT */}
+        ) : (
 
-        <div className="chat-input-area">
+          messages.map((msg) => {
 
-          <input
-            type="text"
-            placeholder="Write a message..."
-            value={message}
-            onChange={(event) =>
-              setMessage(event.target.value)
-            }
-            onKeyDown={handleKeyDown}
-          />
+            const isMine =
+              Number(msg.sender_id) ===
+              currentUserId;
 
-          <button
-            onClick={sendMessage}
-            disabled={!message.trim()}
-          >
-            Send 💬
-          </button>
+            return (
+              <div
+                key={msg.id}
+                className={
+                  isMine
+                    ? "message-row mine"
+                    : "message-row"
+                }
+              >
 
-        </div>
+                <div
+                  className={
+                    isMine
+                      ? "message-bubble mine"
+                      : "message-bubble"
+                  }
+                >
 
-        <p className="chat-safety">
-          🛡️ Stay respectful and never share sensitive personal information.
-        </p>
+                  <p>
+                    {msg.message}
+                  </p>
+
+                  <span>
+                    {new Date(
+                      msg.created_at
+                    ).toLocaleTimeString(
+                      [],
+                      {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}
+                  </span>
+
+                </div>
+
+              </div>
+            );
+          })
+
+        )}
 
       </main>
+
+      {/* ============================================= */}
+      {/* MESSAGE INPUT */}
+      {/* ============================================= */}
+
+      <form
+        className="chat-input-area"
+        onSubmit={sendMessage}
+      >
+
+        <input
+          type="text"
+          value={messageText}
+          onChange={(e) =>
+            setMessageText(
+              e.target.value
+            )
+          }
+          placeholder="Write a message..."
+          disabled={sending}
+        />
+
+        <button
+          type="submit"
+          disabled={
+            sending ||
+            !messageText.trim()
+          }
+        >
+          {sending
+            ? "Sending..."
+            : "Send 💕"}
+        </button>
+
+      </form>
 
     </div>
   );

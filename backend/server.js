@@ -1,23 +1,29 @@
-
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
 const db = require("./config/db");
 const authRoutes = require("./routes/authroutes");
+const userRoutes = require("./routes/userroutes");
+const preferencesRoutes = require("./routes/preferencesroutes");
+const matchRoutes = require("./routes/matchroutes");
+const chatRoutes = require("./routes/chatroutes");
+const connectionRoutes = require("./routes/connections");
+const notificationRoutes = require("./routes/notifications");
 
 const app = express();
 
-
-// ================= MIDDLEWARE =================
-
 app.use(cors());
-
 app.use(express.json());
+app.locals.db = db;
+
 app.use("/api/auth", authRoutes);
-
-
-// ================= HOME ROUTE =================
+app.use("/api/users", userRoutes);
+app.use("/api/preferences", preferencesRoutes);
+app.use("/api/matches", matchRoutes);
+app.use("/api/chat", chatRoutes);
+app.use("/api/connections", connectionRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.get("/", (req, res) => {
   res.json({
@@ -26,10 +32,8 @@ app.get("/", (req, res) => {
   });
 });
 
-
-// ================= DATABASE TEST =================
-
 app.get("/api/test-db", (req, res) => {
+
   db.query("SELECT 1 AS test", (err, result) => {
 
     if (err) {
@@ -47,14 +51,15 @@ app.get("/api/test-db", (req, res) => {
       message: "Database connected successfully ❤️",
       result: result,
     });
+
   });
+
 });
-
-
-// ================= SERVER =================
 
 const PORT = 5000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(
+    `🚀 Server running on http://localhost:${PORT}`
+  );
 });

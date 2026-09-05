@@ -1,33 +1,543 @@
-import { Link, useParams } from "react-router-dom";
-import { useState } from "react";
-import { matches } from "../data/mockdata";
+import { useEffect, useState } from "react";
+import {
+  Link,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 
 function MatchDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
-  const [connected, setConnected] = useState(false);
+  // =====================================================
+  // STATE
+  // =====================================================
 
-  const match =
-    matches.find((item) => item.id === Number(id)) || matches[0];
+  const [match, setMatch] = useState(null);
+  const [myPreferences, setMyPreferences] = useState(null);
+
+  const [connectionStatus, setConnectionStatus] =
+    useState(null);
+
+  const [loading, setLoading] = useState(true);
+  const [connectionLoading, setConnectionLoading] =
+    useState(false);
+  const [error, setError] = useState("");
+
+  // =====================================================
+  // CURRENT USER
+  // =====================================================
+
+  const userId = localStorage.getItem("userId");
+
+  // =====================================================
+  // PREFERENCE CATEGORIES
+  // =====================================================
+
+  const preferenceCategories = [
+    {
+      key: "sleep",
+      title: "Sleep Schedule",
+      subtitle: "Daily routine",
+      icon: "🌙",
+    },
+    {
+      key: "cleanliness",
+      title: "Cleanliness",
+      subtitle: "Living space habits",
+      icon: "🧹",
+    },
+    {
+      key: "social",
+      title: "Social Life",
+      subtitle: "Social preferences",
+      icon: "🎉",
+    },
+    {
+      key: "food",
+      title: "Food Preferences",
+      subtitle: "Cooking & eating",
+      icon: "🍳",
+    },
+    {
+      key: "study",
+      title: "Study Environment",
+      subtitle: "Study & noise preferences",
+      icon: "📚",
+    },
+    {
+      key: "guests",
+      title: "Guests",
+      subtitle: "Visitors & social space",
+      icon: "🏠",
+    },
+  ];
+
+  // =====================================================
+  // LOAD MATCH DETAILS
+  // =====================================================
+
+  useEffect(() => {
+    if (!userId) {
+      navigate("/login");
+      return;
+    }
+
+    const loadMatchDetails = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        // ---------------------------------------------
+        // GET MATCHES
+        // ---------------------------------------------
+
+        const matchesResponse = await fetch(
+          `http://localhost:5000/api/matches/${userId}`
+        );
+
+        if (!matchesResponse.ok) {
+          throw new Error("Failed to load matches");
+        }
+
+        const matchesData =
+          await matchesResponse.json();
+
+        if (!matchesData.success) {
+          throw new Error(
+            matchesData.message ||
+              "Unable to load matches"
+          );
+        }
+
+        const selectedMatch =
+          matchesData.matches?.find(
+            (item) =>
+              Number(item.id) === Number(id)
+          );
+
+        if (!selectedMatch) {
+          setError("Roommate match not found.");
+          return;
+        }
+
+        setMatch(selectedMatch);
+
+        // ---------------------------------------------
+        // GET MY PREFERENCES
+        // ---------------------------------------------
+
+        try {
+          const preferencesResponse =
+            await fetch(
+              `http://localhost:5000/api/preferences/${userId}`
+            );
+
+          if (preferencesResponse.ok) {
+            const preferencesData =
+              await preferencesResponse.json();
+
+            if (
+              preferencesData.success &&
+              preferencesData.preferences
+            ) {
+              setMyPreferences(
+                preferencesData.preferences
+              );
+            }
+          }
+        } catch (preferenceError) {
+          console.log(
+            "Preferences could not be loaded:",
+            preferenceError
+          );
+        }
+
+        // ---------------------------------------------
+        // GET CONNECTION STATUS
+        // ---------------------------------------------
+
+        try {
+          const connectionResponse =
+            await fetch(
+              `http://localhost:5000/api/connections/${userId}`
+            );
+
+          if (connectionResponse.ok) {
+            const connectionData =
+              await connectionResponse.json();
+
+            if (
+              connectionData.success &&
+              connectionData.connections
+            ) {
+              const existingConnection =
+                connectionData.connections.find(
+                  (connection) => {
+                    const sender =
+                      Number(connection.sender_id);
+
+                    const receiver =
+                      Number(connection.receiver_id);
+
+                    const current =
+                      Number(userId);
+
+                    const other =
+                      Number(id);
+
+                    return (
+                      (sender === current &&
+                        receiver === other) ||
+                      (sender === other &&
+                        receiver === current)
+                    );
+                  }
+                );
+
+              if (existingConnection) {
+                setConnectionStatus(
+                  existingConnection.status
+                );
+              }
+            }
+          }
+        } catch (connectionError) {
+          console.log(
+            "Connection status could not be loaded:",
+            connectionError
+          );
+        }
+      } catch (err) {
+        console.error(
+          "Match details error:",
+          err
+        );
+
+        setError(
+          "Unable to load roommate details."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMatchDetails();
+  }, [id, userId, navigate]);
+
+  // =====================================================
+  // SEND CONNECTION REQUEST
+  // =====================================================
+
+  const handleConnect = async () => {
+    if (!userId || !match) {
+      return;
+    }
+
+    try {
+      setConnectionLoading(true);
+
+      const response = await fetch(
+        "http://localhost:5000/api/connections",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            sender_id: Number(userId),
+            receiver_id: Number(match.id),
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      console.log(
+        "Connection response:",
+        data
+      );
+
+      if (!response.ok) {
+        if (data.connection) {
+          setConnectionStatus(
+            data.connection.status
+          );
+        }
+
+        alert(
+          data.message ||
+            "Unable to send connection request."
+        );
+
+        return;
+      }
+
+      setConnectionStatus("pending");
+
+      alert(
+        "Connection request sent successfully ❤️"
+      );
+    } catch (err) {
+      console.error(
+        "Connection request error:",
+        err
+      );
+
+      alert(
+        "Unable to connect to the backend."
+      );
+    } finally {
+      setConnectionLoading(false);
+    }
+  };
+
+  // =====================================================
+  // OPEN CHAT
+  // =====================================================
+
+  const openChat = () => {
+    if (!match) {
+      return;
+    }
+
+    // VERY IMPORTANT:
+    // Chat.jsx reads chatUserId from localStorage.
+    localStorage.setItem(
+      "chatUserId",
+      String(match.id)
+    );
+
+    console.log(
+      "Opening chat with user:",
+      match.id
+    );
+
+    // Open Chat page
+    navigate("/chat");
+  };
+
+  // =====================================================
+  // CATEGORY SCORE
+  // =====================================================
+
+  const getCategoryScore = (
+    myValue,
+    matchValue
+  ) => {
+    if (
+      !myValue ||
+      !matchValue ||
+      myValue === "Not added" ||
+      matchValue === "Not added"
+    ) {
+      return 0;
+    }
+
+    if (
+      String(myValue).toLowerCase() ===
+      String(matchValue).toLowerCase()
+    ) {
+      return 100;
+    }
+
+    return 55;
+  };
+
+  // =====================================================
+  // CATEGORY LABEL
+  // =====================================================
+
+  const getCategoryLabel = (score) => {
+    if (score >= 90) {
+      return "Excellent Match";
+    }
+
+    if (score >= 70) {
+      return "Great Match";
+    }
+
+    if (score >= 50) {
+      return "Good Match";
+    }
+
+    if (score > 0) {
+      return "Different Preferences";
+    }
+
+    return "Not Available";
+  };
+
+  // =====================================================
+  // CONNECTION BUTTON TEXT
+  // =====================================================
+
+  const getConnectionButton = () => {
+    if (connectionStatus === "accepted") {
+      return "💚 Connected";
+    }
+
+    if (connectionStatus === "pending") {
+      return "💚 Request Sent";
+    }
+
+    if (connectionStatus === "rejected") {
+      return "❤️ Connect Again";
+    }
+
+    return "❤️ Connect";
+  };
+
+  // =====================================================
+  // LOADING
+  // =====================================================
+
+  if (loading) {
+    return (
+      <div className="dashboard-loading">
+        <h2>
+          Finding compatibility details... 💕
+        </h2>
+
+        <p>
+          Comparing your lifestyle preferences.
+        </p>
+      </div>
+    );
+  }
+
+  // =====================================================
+  // ERROR
+  // =====================================================
+
+  if (error || !match) {
+    return (
+      <div className="dashboard-empty">
+        <div>💔</div>
+
+        <h2>Match not found</h2>
+
+        <p>
+          {error ||
+            "We could not find this roommate."}
+        </p>
+
+        <Link
+          to="/matches"
+          className="dashboard-quiz-btn"
+        >
+          ← Back to Matches
+        </Link>
+      </div>
+    );
+  }
+
+  // =====================================================
+  // DATA
+  // =====================================================
+
+  const matchPreferences =
+    match.preferences || {};
+
+  const compatibility =
+    Number(match.compatibility) || 0;
+
+  const matchedCategories =
+    Number(match.matchedCategories) || 0;
+
+  const totalCategories =
+    Number(match.totalCategories) ||
+    preferenceCategories.length;
+
+  // =====================================================
+  // STRONG MATCHES
+  // =====================================================
+
+  const strongMatches =
+    preferenceCategories
+      .filter((category) => {
+        const myValue =
+          myPreferences?.[category.key];
+
+        const matchValue =
+          matchPreferences?.[category.key];
+
+        return (
+          myValue &&
+          matchValue &&
+          String(myValue).toLowerCase() ===
+            String(matchValue).toLowerCase()
+        );
+      })
+      .map((category) => {
+        const value =
+          myPreferences?.[category.key];
+
+        return `${category.title}: You both prefer "${value}".`;
+      });
+
+  // =====================================================
+  // DISCUSSION TOPICS
+  // =====================================================
+
+  const discussionTopics =
+    preferenceCategories
+      .filter((category) => {
+        const myValue =
+          myPreferences?.[category.key];
+
+        const matchValue =
+          matchPreferences?.[category.key];
+
+        return (
+          myValue &&
+          matchValue &&
+          String(myValue).toLowerCase() !==
+            String(matchValue).toLowerCase()
+        );
+      })
+      .map((category) => {
+        const myValue =
+          myPreferences?.[category.key];
+
+        const matchValue =
+          matchPreferences?.[category.key];
+
+        return `${category.title}: You prefer "${myValue}", while ${match.name} prefers "${matchValue}".`;
+      });
+
+  // =====================================================
+  // UI
+  // =====================================================
 
   return (
     <div className="match-details-page">
 
-      {/* BACK BUTTON */}
       <div className="details-container">
 
-        <Link to="/matches" className="back-matches">
+        {/* ================================================= */}
+        {/* BACK */}
+        {/* ================================================= */}
+
+        <Link
+          to="/matches"
+          className="back-matches"
+        >
           ← Back to Matches
         </Link>
 
-
+        {/* ================================================= */}
         {/* PROFILE CARD */}
+        {/* ================================================= */}
+
         <section className="details-profile-card">
 
           <div className="details-profile-left">
 
             <div className="details-avatar">
-              {match.avatar}
+              👩🏻
             </div>
 
             <div className="details-user-info">
@@ -37,29 +547,34 @@ function MatchDetails() {
               </span>
 
               <h1>
-                {match.name}, {match.age}
+                {match.name}
               </h1>
 
               <p>
-                📍 {match.location} • {match.role}
+                📍{" "}
+                {match.location ||
+                  "Location not added"}
+                {" • "}
+                {match.role || "Student"}
               </p>
 
               <p className="details-bio">
-                {match.bio}
+                {match.bio ||
+                  "Looking for a compatible roommate"}
               </p>
 
             </div>
 
           </div>
 
-
           {/* SCORE */}
+
           <div className="details-score">
 
             <div className="score-circle">
 
               <strong>
-                {match.compatibility}%
+                {compatibility}%
               </strong>
 
             </div>
@@ -72,33 +587,51 @@ function MatchDetails() {
 
         </section>
 
-
+        {/* ================================================= */}
         {/* ACTION BUTTONS */}
+        {/* ================================================= */}
+
         <div className="details-actions">
 
-          <Link
-            to="/chat"
-            className="send-message-btn"
-          >
-            💬 Send Message
-          </Link>
-
+          {/* CONNECTION */}
 
           <button
             className={`connect-btn ${
-              connected ? "connected" : ""
+              connectionStatus ===
+              "accepted"
+                ? "connected"
+                : ""
             }`}
-            onClick={() => setConnected(!connected)}
+            onClick={handleConnect}
+            disabled={
+              connectionLoading ||
+              connectionStatus ===
+                "pending" ||
+              connectionStatus ===
+                "accepted"
+            }
           >
-            {connected
-              ? "💚 Connected"
-              : "❤️ Connect"}
+            {connectionLoading
+              ? "Sending..."
+              : getConnectionButton()}
+          </button>
+
+          {/* CHAT */}
+
+          <button
+            type="button"
+            className="send-message-btn"
+            onClick={openChat}
+          >
+            💬 Send Message
           </button>
 
         </div>
 
-
+        {/* ================================================= */}
         {/* COMPATIBILITY ANALYSIS */}
+        {/* ================================================= */}
+
         <section className="analysis-section">
 
           <div className="analysis-heading">
@@ -112,225 +645,184 @@ function MatchDetails() {
             </h2>
 
             <p>
-              Here's how your lifestyle preferences compare.
+              Here's how your lifestyle
+              preferences compare.
             </p>
 
           </div>
 
+          {/* ================================================= */}
+          {/* SUMMARY */}
+          {/* ================================================= */}
 
-          {/* COMPATIBILITY CARDS */}
+          <div className="compatibility-summary">
+
+            <div className="summary-box">
+
+              <strong>
+                {compatibility}%
+              </strong>
+
+              <span>
+                Overall Compatibility
+              </span>
+
+            </div>
+
+            <div className="summary-box">
+
+              <strong>
+                {matchedCategories}
+              </strong>
+
+              <span>
+                Preferences Matched
+              </span>
+
+            </div>
+
+            <div className="summary-box">
+
+              <strong>
+                {totalCategories}
+              </strong>
+
+              <span>
+                Total Categories
+              </span>
+
+            </div>
+
+          </div>
+
+          {/* ================================================= */}
+          {/* PREFERENCE CARDS */}
+          {/* ================================================= */}
+
           <div className="compatibility-grid">
 
+            {preferenceCategories.map(
+              (category) => {
 
-            {/* SLEEP */}
-            <div className="compatibility-card">
+                const myValue =
+                  myPreferences?.[
+                    category.key
+                  ] || "Not added";
 
-              <div className="compatibility-card-header">
+                const matchValue =
+                  matchPreferences?.[
+                    category.key
+                  ] || "Not added";
 
-                <span>🌙</span>
+                const score =
+                  getCategoryScore(
+                    myValue,
+                    matchValue
+                  );
 
-                <div>
-                  <h3>Sleep Schedule</h3>
-                  <p>Daily routine</p>
-                </div>
+                const label =
+                  getCategoryLabel(score);
 
-              </div>
+                return (
+                  <div
+                    className="compatibility-card"
+                    key={category.key}
+                  >
 
+                    {/* HEADER */}
 
-              <div className="comparison-row">
+                    <div className="compatibility-card-header">
 
-                <div>
-                  <small>Your Preference</small>
-                  <strong>Night Owl</strong>
-                </div>
+                      <span>
+                        {category.icon}
+                      </span>
 
-                <div className="match-arrow">
-                  ↔
-                </div>
+                      <div>
 
-                <div>
-                  <small>
-                    {match.name}'s Preference
-                  </small>
+                        <h3>
+                          {category.title}
+                        </h3>
 
-                  <strong>
-                    {match.sleep}
-                  </strong>
-                </div>
+                        <p>
+                          {category.subtitle}
+                        </p>
 
-              </div>
+                      </div>
 
+                    </div>
 
-              <div className="detail-progress">
-                <div style={{ width: "98%" }}></div>
-              </div>
+                    {/* COMPARISON */}
 
-              <span className="match-label">
-                Excellent Match
-              </span>
+                    <div className="comparison-row">
 
-            </div>
+                      <div>
 
+                        <small>
+                          Your Preference
+                        </small>
 
-            {/* CLEANLINESS */}
-            <div className="compatibility-card">
+                        <strong>
+                          {myValue}
+                        </strong>
 
-              <div className="compatibility-card-header">
+                      </div>
 
-                <span>🧹</span>
+                      <div className="match-arrow">
+                        ↔
+                      </div>
 
-                <div>
-                  <h3>Cleanliness</h3>
-                  <p>Living space habits</p>
-                </div>
+                      <div>
 
-              </div>
+                        <small>
+                          {match.name}'s
+                          Preference
+                        </small>
 
+                        <strong>
+                          {matchValue}
+                        </strong>
 
-              <div className="comparison-row">
+                      </div>
 
-                <div>
-                  <small>Your Preference</small>
-                  <strong>Very Clean</strong>
-                </div>
+                    </div>
 
-                <div className="match-arrow">
-                  ↔
-                </div>
+                    {/* PROGRESS */}
 
-                <div>
-                  <small>
-                    {match.name}'s Preference
-                  </small>
+                    <div className="detail-progress">
 
-                  <strong>
-                    {match.cleanliness}
-                  </strong>
-                </div>
+                      <div
+                        style={{
+                          width: `${score}%`,
+                        }}
+                      />
 
-              </div>
+                    </div>
 
+                    {/* LABEL */}
 
-              <div className="detail-progress">
-                <div style={{ width: "95%" }}></div>
-              </div>
-
-              <span className="match-label">
-                Excellent Match
-              </span>
-
-            </div>
-
-
-            {/* SOCIAL */}
-            <div className="compatibility-card">
-
-              <div className="compatibility-card-header">
-
-                <span>🎉</span>
-
-                <div>
-                  <h3>Social Life</h3>
-                  <p>Social preferences</p>
-                </div>
-
-              </div>
-
-
-              <div className="comparison-row">
-
-                <div>
-                  <small>Your Preference</small>
-                  <strong>Balanced</strong>
-                </div>
-
-                <div className="match-arrow">
-                  ↔
-                </div>
-
-                <div>
-                  <small>
-                    {match.name}'s Preference
-                  </small>
-
-                  <strong>
-                    {match.social}
-                  </strong>
-                </div>
-
-              </div>
-
-
-              <div className="detail-progress">
-                <div style={{ width: "92%" }}></div>
-              </div>
-
-              <span className="match-label">
-                Great Match
-              </span>
-
-            </div>
-
-
-            {/* FOOD */}
-            <div className="compatibility-card">
-
-              <div className="compatibility-card-header">
-
-                <span>🍳</span>
-
-                <div>
-                  <h3>Food Preferences</h3>
-                  <p>Cooking & eating</p>
-                </div>
-
-              </div>
-
-
-              <div className="comparison-row">
-
-                <div>
-                  <small>Your Preference</small>
-                  <strong>Cooking</strong>
-                </div>
-
-                <div className="match-arrow">
-                  ↔
-                </div>
-
-                <div>
-                  <small>
-                    {match.name}'s Preference
-                  </small>
-
-                  <strong>
-                    {match.food}
-                  </strong>
-                </div>
-
-              </div>
-
-
-              <div className="detail-progress">
-                <div style={{ width: "88%" }}></div>
-              </div>
-
-              <span className="match-label">
-                Good Match
-              </span>
-
-            </div>
+                    <span className="match-label">
+                      {label}
+                    </span>
+
+                  </div>
+                );
+              }
+            )}
 
           </div>
 
         </section>
 
+        {/* ================================================= */}
+        {/* STRONG MATCHES + DISCUSSION */}
+        {/* ================================================= */}
 
-        {/* STRONG COMPATIBILITY & DISCUSSION */}
         <section className="analysis-bottom">
 
-
+          {/* ================================================= */}
           {/* STRONG COMPATIBILITY */}
+          {/* ================================================= */}
+
           <div className="strength-card">
 
             <div className="analysis-card-title">
@@ -340,41 +832,67 @@ function MatchDetails() {
               </div>
 
               <div>
-                <h3>Strong Compatibility</h3>
+
+                <h3>
+                  Strong Compatibility
+                </h3>
 
                 <p>
-                  Things you already have in common
+                  Things you already have
+                  in common
                 </p>
+
               </div>
 
             </div>
 
-
             <div className="strength-list">
 
-              {match.strengths.map((item, index) => (
+              {strongMatches.length >
+              0 ? (
+                strongMatches.map(
+                  (item, index) => (
+                    <div
+                      className="strength-item"
+                      key={index}
+                    >
 
-                <div
-                  className="strength-item"
-                  key={index}
-                >
+                      <span>
+                        ✓
+                      </span>
 
-                  <span>✓</span>
+                      <p>
+                        {item}
+                      </p>
+
+                    </div>
+                  )
+                )
+              ) : (
+                <div className="strength-item">
+
+                  <span>
+                    💕
+                  </span>
 
                   <p>
-                    {item}
+                    You have different
+                    preferences, but that
+                    doesn't mean you cannot
+                    be good roommates.
                   </p>
 
                 </div>
-
-              ))}
+              )}
 
             </div>
 
           </div>
 
+          {/* ================================================= */}
+          {/* DISCUSSION */}
+          {/* ================================================= */}
 
-          {/* THINGS TO DISCUSS */}
           <div className="discussion-card">
 
             <div className="analysis-card-title">
@@ -390,32 +908,50 @@ function MatchDetails() {
                 </h3>
 
                 <p>
-                  Topics worth talking about
+                  Topics worth talking
+                  about
                 </p>
 
               </div>
 
             </div>
 
-
             <div className="discussion-list">
 
-              {match.conflicts.map((item, index) => (
+              {discussionTopics.length >
+              0 ? (
+                discussionTopics.map(
+                  (item, index) => (
+                    <div
+                      className="discussion-item"
+                      key={index}
+                    >
 
-                <div
-                  className="discussion-item"
-                  key={index}
-                >
+                      <span>
+                        •
+                      </span>
 
-                  <span>•</span>
+                      <p>
+                        {item}
+                      </p>
+
+                    </div>
+                  )
+                )
+              ) : (
+                <div className="discussion-item">
+
+                  <span>
+                    ✓
+                  </span>
 
                   <p>
-                    {item}
+                    Great! Your preferences
+                    are very similar.
                   </p>
 
                 </div>
-
-              ))}
+              )}
 
             </div>
 
@@ -423,8 +959,10 @@ function MatchDetails() {
 
         </section>
 
-
+        {/* ================================================= */}
         {/* FINAL CTA */}
+        {/* ================================================= */}
+
         <section className="details-cta">
 
           <div>
@@ -434,23 +972,25 @@ function MatchDetails() {
             </span>
 
             <h2>
-              Start a conversation with {match.name}.
+              Start a conversation with{" "}
+              {match.name}.
             </h2>
 
             <p>
-              Get to know each other before deciding
-              if you're the right roommate match.
+              Get to know each other before
+              deciding if you're the right
+              roommate match.
             </p>
 
           </div>
 
-
-          <Link
-            to="/chat"
+          <button
+            type="button"
             className="send-message-btn"
+            onClick={openChat}
           >
             💬 Send Message
-          </Link>
+          </button>
 
         </section>
 

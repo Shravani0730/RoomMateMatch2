@@ -4217,3 +4217,2393 @@ a {
   font-size: 15px;
   outline: none;
 }
+/* =====================================================
+   CHAT PAGE
+===================================================== */
+
+.chat-page {
+  min-height: 100vh;
+  background: #fff7fa;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* HEADER */
+
+.chat-header {
+  height: 78px;
+  background: #ffffff;
+  border-bottom: 1px solid #f3d9e4;
+  display: flex;
+  align-items: center;
+  padding: 0 30px;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.chat-back {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #df4f83;
+  font-size: 24px;
+  background: #fff0f5;
+}
+
+.chat-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #fff0f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.chat-user-info h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #28202a;
+}
+
+.chat-user-info span {
+  display: block;
+  margin-top: 3px;
+  color: #777;
+  font-size: 13px;
+}
+
+
+/* MESSAGES */
+
+.chat-messages {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.message-row {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.my-message-row {
+  justify-content: flex-end;
+}
+
+.their-message-row {
+  justify-content: flex-start;
+}
+
+.message-bubble {
+  max-width: 65%;
+  padding: 14px 18px;
+  border-radius: 18px;
+}
+
+.my-message {
+  background: #df4f83;
+  color: white;
+  border-bottom-right-radius: 5px;
+}
+
+.their-message {
+  background: white;
+  color: #382c34;
+  border: 1px solid #f2dce5;
+  border-bottom-left-radius: 5px;
+}
+
+.message-bubble p {
+  margin: 0 0 6px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.message-bubble span {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+
+/* EMPTY CHAT */
+
+.empty-chat {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.empty-chat-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: #ffeaf2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin-bottom: 18px;
+}
+
+.empty-chat h3 {
+  margin: 0 0 8px;
+  color: #30242b;
+}
+
+.empty-chat p {
+  margin: 0 0 5px;
+  color: #666;
+}
+
+.empty-chat span {
+  color: #999;
+  font-size: 13px;
+}
+
+
+/* INPUT */
+
+.chat-input-area {
+  background: white;
+  border-top: 1px solid #f3d9e4;
+  padding: 18px 30px;
+  display: flex;
+  gap: 12px;
+}
+
+.chat-input-area input {
+  flex: 1;
+  height: 48px;
+  border: 1px solid #e8cbd7;
+  border-radius: 25px;
+  padding: 0 20px;
+  outline: none;
+  font-size: 15px;
+}
+
+.chat-input-area input:focus {
+  border-color: #df4f83;
+}
+
+.chat-input-area button {
+  height: 48px;
+  padding: 0 25px;
+  border: none;
+  border-radius: 25px;
+  background: #df4f83;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chat-input-area button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+/* LOADING */
+
+.chat-loading,
+.chat-unavailable {
+  min-height: 100vh;
+  background: #fff7fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-loading-card,
+.chat-unavailable-card {
+  background: white;
+  padding: 45px;
+  border-radius: 25px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(200, 80, 130, 0.1);
+}
+
+.loading-heart,
+.chat-big-icon {
+  font-size: 45px;
+  margin-bottom: 15px;
+}
+
+.chat-loading-card h2,
+.chat-unavailable-card h2 {
+  margin: 0 0 10px;
+  color: #30242b;
+}
+
+.chat-loading-card p,
+.chat-unavailable-card p {
+  color: #777;
+}
+
+.chat-back-btn {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 12px 22px;
+  border-radius: 22px;
+  background: #df4f83;
+  color: white;
+  text-decoration: none;
+}
+
+
+/* ERROR */
+
+.chat-error {
+  background: #fff0f3;
+  border: 1px solid #f3cbd7;
+  color: #c43e68;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+  .chat-header {
+    padding: 0 15px;
+  }
+
+  .chat-messages {
+    padding: 20px 15px;
+  }
+
+  .message-bubble {
+    max-width: 82%;
+  }
+
+  .chat-input-area {
+    padding: 12px 15px;
+  }
+
+  .chat-input-area button {
+    padding: 0 16px;
+  }
+
+}
+/* =====================================================
+   NOTIFICATIONS PAGE
+===================================================== */
+
+.notifications-page {
+  min-height: calc(100vh - 70px);
+  background: #fff8fb;
+  padding: 55px 7%;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.notifications-header {
+  max-width: 1100px;
+  margin: 0 auto 38px;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.notifications-header > div {
+  text-align: left;
+}
+
+.notifications-header .profile-label {
+  display: inline-block;
+  margin-bottom: 10px;
+
+  color: #e44f86;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.notifications-header h1 {
+  margin: 0;
+
+  font-size: 42px;
+  line-height: 1.15;
+  color: #21151b;
+  font-weight: 750;
+}
+
+.notifications-header p {
+  margin: 12px 0 0;
+
+  color: #806d76;
+  font-size: 16px;
+}
+
+
+/* =====================================================
+   MARK ALL READ BUTTON
+===================================================== */
+
+.mark-read-btn {
+  border: 1px solid #f2b8ce;
+  background: white;
+
+  color: #df4d82;
+
+  padding: 12px 20px;
+  border-radius: 12px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+.mark-read-btn:hover {
+  background: #fff0f6;
+  border-color: #df4d82;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(224, 79, 130, 0.12);
+}
+
+
+/* =====================================================
+   NOTIFICATION LIST
+===================================================== */
+
+.notifications-list {
+  max-width: 1100px;
+  margin: 0 auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+
+/* =====================================================
+   NOTIFICATION CARD
+===================================================== */
+
+.notification-card {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  gap: 20px;
+
+  background: #ffffff;
+
+  border: 1px solid #f2dce5;
+  border-radius: 18px;
+
+  padding: 22px 25px;
+
+  box-shadow:
+    0 5px 20px rgba(190, 96, 130, 0.06);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.notification-card:hover {
+  transform: translateY(-3px);
+
+  border-color: #efb5ca;
+
+  box-shadow:
+    0 12px 30px rgba(190, 96, 130, 0.12);
+}
+
+
+/* =====================================================
+   UNREAD NOTIFICATION
+===================================================== */
+
+.notification-card.unread {
+  background: linear-gradient(
+    135deg,
+    #fff5f9,
+    #ffffff
+  );
+
+  border-color: #f0aac4;
+}
+
+.notification-card.unread::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+
+  width: 4px;
+
+  background: #e64f87;
+
+  border-radius: 0 5px 5px 0;
+}
+
+
+/* =====================================================
+   NOTIFICATION ICON
+===================================================== */
+
+.notification-icon {
+  flex-shrink: 0;
+
+  width: 58px;
+  height: 58px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 16px;
+
+  background: #fff0f6;
+
+  font-size: 25px;
+
+  box-shadow:
+    inset 0 0 0 1px #f8d9e5;
+}
+
+
+/* =====================================================
+   NOTIFICATION CONTENT
+===================================================== */
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-content h3 {
+  margin: 0 0 6px;
+
+  color: #2a1c22;
+
+  font-size: 17px;
+  font-weight: 750;
+}
+
+.notification-content p {
+  margin: 0;
+
+  color: #76666e;
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.notification-content span {
+  display: block;
+
+  margin-top: 8px;
+
+  color: #b0939f;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+
+/* =====================================================
+   NAVBAR
+===================================================== */
+
+.inner-page {
+  min-height: 100vh;
+  background: #fff8fb;
+}
+
+.inner-navbar {
+  height: 68px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 7%;
+
+  background: rgba(255, 255, 255, 0.96);
+
+  border-bottom: 1px solid #f5dce6;
+
+  position: sticky;
+  top: 0;
+  z-index: 20;
+
+  backdrop-filter: blur(10px);
+}
+
+.dashboard-logo {
+  text-decoration: none;
+
+  color: #21151b;
+
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.dashboard-logo span {
+  color: #e45187;
+}
+
+.nav-back {
+  text-decoration: none;
+
+  color: #df4d82;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  transition: color 0.2s ease;
+}
+
+.nav-back:hover {
+  color: #b92e61;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+
+  .notifications-page {
+    padding: 35px 20px;
+  }
+
+  .notifications-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .notifications-header h1 {
+    font-size: 34px;
+  }
+
+  .mark-read-btn {
+    width: 100%;
+  }
+
+  .notification-card {
+    padding: 18px;
+    gap: 14px;
+  }
+
+  .notification-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 22px;
+  }
+
+  .notification-content h3 {
+    font-size: 15px;
+  }
+
+  .notification-content p {
+    font-size: 13px;
+  }
+
+  .inner-navbar {
+    padding: 0 20px;
+  }
+
+  .dashboard-logo {
+    font-size: 17px;
+  }
+
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media (max-width: 480px) {
+
+  .notifications-page {
+    padding: 28px 15px;
+  }
+
+  .notifications-header h1 {
+    font-size: 30px;
+  }
+
+  .notifications-header p {
+    font-size: 14px;
+  }
+
+  .notification-card {
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  .notification-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 13px;
+    font-size: 20px;
+  }
+
+}
+/* =====================================================
+   NOTIFICATIONS LOADING
+===================================================== */
+
+.notifications-loading {
+  max-width: 700px;
+  margin: 100px auto;
+  text-align: center;
+}
+
+.loading-heart {
+  font-size: 45px;
+  margin-bottom: 15px;
+}
+
+.notifications-loading h2 {
+  margin: 0;
+  color: #2b1b22;
+}
+
+.notifications-loading p {
+  color: #8c737e;
+}
+
+
+/* =====================================================
+   EMPTY STATE
+===================================================== */
+
+.notifications-empty {
+  max-width: 600px;
+  margin: 70px auto;
+  padding: 55px 30px;
+
+  text-align: center;
+
+  background: white;
+
+  border: 1px solid #f2dce5;
+  border-radius: 22px;
+
+  box-shadow:
+    0 10px 35px rgba(190, 96, 130, 0.08);
+}
+
+.empty-icon {
+  width: 70px;
+  height: 70px;
+
+  margin: 0 auto 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #fff0f6;
+
+  border-radius: 20px;
+
+  font-size: 30px;
+}
+
+.notifications-empty h2 {
+  margin: 0 0 10px;
+
+  color: #2b1b22;
+  font-size: 24px;
+}
+
+.notifications-empty p {
+  margin: 0 0 25px;
+
+  color: #89747e;
+}
+
+
+/* =====================================================
+   VIEW MATCHES BUTTON
+===================================================== */
+
+.view-matches-btn,
+.retry-btn {
+  display: inline-block;
+
+  padding: 12px 22px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #e44f86;
+
+  color: white;
+
+  text-decoration: none;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.25s ease;
+}
+
+.view-matches-btn:hover,
+.retry-btn:hover {
+  background: #d33f75;
+  transform: translateY(-2px);
+}
+
+
+/* =====================================================
+   NOTIFICATION ACTION
+===================================================== */
+
+.notification-action {
+  flex-shrink: 0;
+
+  padding: 9px 14px;
+
+  border: 1px solid #f0bfd1;
+
+  border-radius: 10px;
+
+  background: #fff8fb;
+
+  color: #df4d82;
+
+  text-decoration: none;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  transition: 0.2s ease;
+}
+
+.notification-action:hover {
+  background: #ffeaf2;
+  border-color: #df4d82;
+}
+
+
+/* =====================================================
+   NOTIFICATION TYPES
+===================================================== */
+
+.notification-icon.connection {
+  background: #fff0f6;
+}
+
+.notification-icon.accepted {
+  background: #edfff5;
+}
+
+.notification-icon.rejected {
+  background: #fff0f1;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 700px) {
+
+  .notification-card {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .notification-content {
+    width: calc(100% - 75px);
+  }
+
+  .notification-action {
+    margin-left: 74px;
+  }
+
+}
+
+/* =====================================================
+   CONNECTED ROOMMATES PAGE
+===================================================== */
+
+.connected-page {
+  min-height: 100vh;
+  background: #fff7fa;
+  color: #241c22;
+}
+
+
+/* =====================================================
+   NAVBAR
+===================================================== */
+
+.connected-navbar {
+  height: 70px;
+  padding: 0 6%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  border-bottom: 1px solid #f4dce6;
+}
+
+.connected-logo {
+  text-decoration: none;
+  color: #242024;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.connected-logo span {
+  color: #e84d87;
+}
+
+.connected-back {
+  text-decoration: none;
+  color: #e84d87;
+  font-weight: 600;
+}
+
+.connected-back:hover {
+  color: #c93770;
+}
+
+
+/* =====================================================
+   CONTAINER
+===================================================== */
+
+.connected-container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 0;
+}
+
+
+/* =====================================================
+   HEADING
+===================================================== */
+
+.connected-heading {
+  margin-bottom: 40px;
+}
+
+.connected-heading > span {
+  display: block;
+  color: #e84d87;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+.connected-heading h1 {
+  margin: 0;
+  font-size: 42px;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.connected-heading p {
+  margin-top: 12px;
+  color: #766c72;
+  font-size: 17px;
+}
+
+
+/* =====================================================
+   GRID
+===================================================== */
+
+.connected-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(330px, 1fr)
+  );
+  gap: 24px;
+}
+
+
+/* =====================================================
+   CARD
+===================================================== */
+
+.connected-card {
+  background: white;
+  border: 1px solid #f1dbe5;
+  border-radius: 22px;
+  padding: 28px;
+  box-shadow:
+    0 10px 30px rgba(214, 93, 135, 0.08);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.connected-card:hover {
+  transform: translateY(-4px);
+
+  box-shadow:
+    0 16px 36px rgba(214, 93, 135, 0.14);
+}
+
+
+/* =====================================================
+   AVATAR
+===================================================== */
+
+.connected-avatar {
+  width: 76px;
+  height: 76px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #fff0f6;
+  border: 1px solid #f7d8e5;
+
+  border-radius: 50%;
+
+  font-size: 38px;
+
+  margin-bottom: 20px;
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.connected-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 6px 12px;
+
+  background: #effbf4;
+  color: #29975a;
+
+  border-radius: 30px;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  margin-bottom: 12px;
+}
+
+.connected-status span {
+  width: 7px;
+  height: 7px;
+
+  background: #36b96c;
+
+  border-radius: 50%;
+}
+
+
+/* =====================================================
+   INFO
+===================================================== */
+
+.connected-info h2 {
+  margin: 0;
+  font-size: 25px;
+}
+
+.connected-role {
+  margin: 6px 0 0;
+  color: #e84d87;
+  font-weight: 600;
+}
+
+.connected-location {
+  margin: 10px 0 0;
+  color: #6f666b;
+}
+
+.connected-bio {
+  margin-top: 14px;
+  color: #766c72;
+  line-height: 1.6;
+}
+
+
+/* =====================================================
+   ACTIONS
+===================================================== */
+
+.connected-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.connected-chat-btn,
+.connected-profile-btn {
+  flex: 1;
+
+  min-height: 45px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+  text-decoration: none;
+
+  transition: 0.2s ease;
+}
+
+.connected-chat-btn {
+  border: none;
+  background: #e84d87;
+  color: white;
+}
+
+.connected-chat-btn:hover {
+  background: #d93e78;
+  transform: translateY(-1px);
+}
+
+.connected-profile-btn {
+  border: 1px solid #f0bfd3;
+  background: white;
+  color: #e84d87;
+}
+
+.connected-profile-btn:hover {
+  background: #fff0f6;
+}
+
+
+/* =====================================================
+   LOADING
+===================================================== */
+
+.connected-loading {
+  min-height: 70vh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.connected-loading-icon {
+  font-size: 45px;
+  margin-bottom: 15px;
+}
+
+.connected-loading h2 {
+  margin: 0;
+}
+
+.connected-loading p {
+  color: #766c72;
+}
+
+
+/* =====================================================
+   EMPTY
+===================================================== */
+
+.connected-empty {
+  background: white;
+  border: 1px solid #f1dbe5;
+
+  border-radius: 24px;
+
+  padding: 60px 30px;
+
+  text-align: center;
+
+  box-shadow:
+    0 10px 30px rgba(214, 93, 135, 0.07);
+}
+
+.connected-empty-icon {
+  width: 80px;
+  height: 80px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 auto 20px;
+
+  border-radius: 50%;
+
+  background: #fff0f6;
+
+  font-size: 38px;
+}
+
+.connected-empty h2 {
+  margin: 0;
+  font-size: 25px;
+}
+
+.connected-empty p {
+  max-width: 560px;
+  margin: 12px auto 25px;
+
+  color: #766c72;
+  line-height: 1.6;
+}
+
+
+/* =====================================================
+   PRIMARY BUTTON
+===================================================== */
+
+.connected-primary-btn {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 46px;
+
+  padding: 0 24px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #e84d87;
+  color: white;
+
+  text-decoration: none;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.connected-primary-btn:hover {
+  background: #d93e78;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 700px) {
+
+  .connected-navbar {
+    padding: 0 20px;
+  }
+
+  .connected-logo {
+    font-size: 20px;
+  }
+
+  .connected-container {
+    width: 92%;
+    padding: 40px 0;
+  }
+
+  .connected-heading h1 {
+    font-size: 34px;
+  }
+
+  .connected-heading p {
+    font-size: 15px;
+  }
+
+  .connected-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .connected-card {
+    padding: 22px;
+  }
+
+  .connected-actions {
+    flex-direction: column;
+  }
+
+}
+/* =========================================================
+   CONNECTED ROOMMATES GRID - FIXED
+   ========================================================= */
+
+-grid {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+
+  display: grid;
+
+  /* Cards stay a reasonable width */
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(280px, 340px)
+  );
+
+  justify-content: center;
+  align-items: stretch;
+
+  gap: 24px;
+
+  box.connected-dashboard-sizing: border-box;
+}
+/* =========================================================
+   FINAL DASHBOARD WIDTH FIX
+   ========================================================= */
+
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.dashboard-page {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.dashboard-navbar {
+  width: 100%;
+  max-width: 100%;
+}
+
+.dashboard-content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   WELCOME
+   ========================================================= */
+
+.dashboard-welcome {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   STATS
+   ========================================================= */
+
+.dashboard-stats {
+  width: 100%;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+.dashboard-stat-card {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   CONNECTED ROOMMATES
+   ========================================================= */
+
+-section {
+  width: 100%;.connected-dashboard
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.connected-dashboard-heading {
+  width: 100%;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   CONNECTED ROOMMATES - FINAL CLEAN VERSION
+   ========================================================= */
+
+.connected-dashboard-section {
+  width: 100%;
+  max-width: 100%;
+  margin: 55px 0 70px;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* =========================
+   HEADING
+   ========================= */
+
+.connected-dashboard-heading {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto 30px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.connected-dashboard-heading > div {
+  width: 100%;
+  text-align: center;
+}
+
+.connected-dashboard-heading span {
+  display: block;
+  margin-bottom: 8px;
+
+  color: #e84d8a;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.connected-dashboard-heading h2 {
+  margin: 0 0 8px;
+
+  color: #171717;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.connected-dashboard-heading p {
+  margin: 0;
+
+  color: #777;
+  font-size: 15px;
+}
+
+/* =========================
+   VIEW ALL
+   ========================= */
+
+.connected-dashboard-heading .view-all-btn {
+  margin-top: 14px;
+
+  color: #e84d8a;
+  font-size: 14px;
+  font-weight: 600;
+
+  text-decoration: none;
+}
+
+.connected-dashboard-heading .view-all-btn:hover {
+  color: #c93670;
+}
+
+/* =========================
+   ROOMMATE CONTAINER
+   ========================= */
+
+.connected-dashboard-grid {
+  width: 100%;
+  max-width: 1100px;
+
+  margin: 0 auto;
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+
+  gap: 24px;
+
+  box-sizing: border-box;
+}
+
+/* =========================
+   ROOMMATE CARD
+   ========================= */
+
+.connected-dashboard-card {
+  flex: 0 1 340px;
+
+  width: 340px;
+  max-width: 340px;
+  min-width: 0;
+
+  padding: 28px 24px 22px;
+
+  background: #ffffff;
+
+  border: 1px solid #f4dce7;
+  border-radius: 20px;
+
+  box-shadow:
+    0 8px 25px rgba(220, 90, 140, 0.07);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+
+  box-sizing: border-box;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.connected-dashboard-card:hover {
+  transform: translateY(-4px);
+
+  box-shadow:
+    0 14px 32px rgba(220, 90, 140, 0.13);
+}
+
+/* =========================
+   AVATAR
+   ========================= */
+
+.connected-dashboard-avatar {
+  width: 64px;
+  height: 64px;
+
+  margin-bottom: 15px;
+
+  border-radius: 50%;
+
+  background: #fde7f0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 30px;
+
+  flex-shrink: 0;
+}
+
+/* =========================
+   USER INFORMATION
+   ========================= */
+
+.connected-dashboard-info {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+}
+
+.connected-dashboard-info .connected-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  padding: 7px 13px;
+  margin-bottom: 14px;
+
+  background: #ecfbf3;
+  color: #27a765;
+
+  border-radius: 30px;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.connected-dashboard-info .connected-status span {
+  width: 7px;
+  height: 7px;
+
+  margin: 0;
+
+  background: #38bd78;
+
+  border-radius: 50%;
+}
+
+.connected-dashboard-info h3 {
+  margin: 0 0 6px;
+
+  color: #282828;
+
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.connected-dashboard-info p {
+  margin: 0 0 7px;
+
+  color: #777;
+
+  font-size: 14px;
+}
+
+.connected-dashboard-info small {
+  display: block;
+
+  color: #999;
+
+  font-size: 13px;
+}
+
+/* =========================
+   CHAT BUTTON
+   ========================= */
+
+.connected-dashboard-card .connected-chat-btn {
+  width: 100%;
+
+  margin-top: 20px;
+  padding: 12px 18px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #e84d8a;
+  color: white;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  text-align: center;
+  text-decoration: none;
+
+  cursor: pointer;
+
+  box-sizing: border-box;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.connected-dashboard-card .connected-chat-btn:hover {
+  background: #d93f7b;
+
+  transform: translateY(-1px);
+}
+
+/* =========================
+   LOADING
+   ========================= */
+
+.dashboard-loading-small {
+  width: 100%;
+  max-width: 1100px;
+
+  margin: 0 auto;
+  padding: 35px 20px;
+
+  text-align: center;
+
+  color: #777;
+
+  box-sizing: border-box;
+}
+
+/* =========================
+   EMPTY STATE
+   ========================= */
+
+.connected-dashboard-empty {
+  width: 100%;
+  max-width: 650px;
+
+  margin: 0 auto;
+  padding: 45px 25px;
+
+  background: white;
+
+  border: 1px solid #f4dce7;
+  border-radius: 20px;
+
+  text-align: center;
+
+  box-sizing: border-box;
+}
+
+.connected-dashboard-icon {
+  margin-bottom: 12px;
+
+  font-size: 38px;
+}
+
+.connected-dashboard-empty h3 {
+  margin: 0 0 10px;
+
+  color: #282828;
+
+  font-size: 21px;
+}
+
+.connected-dashboard-empty p {
+  margin: 0 0 20px;
+
+  color: #777;
+
+  line-height: 1.6;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .connected-dashboard-grid {
+    gap: 20px;
+  }
+
+  .connected-dashboard-card {
+    flex-basis: 320px;
+    width: 320px;
+    max-width: 320px;
+  }
+
+}
+
+@media (max-width: 650px) {
+
+  .connected-dashboard-section {
+    margin: 40px 0 55px;
+    padding: 0 14px;
+  }
+
+  .connected-dashboard-heading h2 {
+    font-size: 24px;
+  }
+
+  .connected-dashboard-heading p {
+    font-size: 14px;
+  }
+
+  .connected-dashboard-grid {
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .connected-dashboard-card {
+    width: 100%;
+    max-width: 380px;
+    flex-basis: auto;
+  }
+
+}
+/* =========================================================
+   CONNECTED ROOMMATES PAGE
+   CLEAN FINAL UI
+   ========================================================= */
+
+.connected-page {
+  min-height: 100vh;
+  background: #fff8fb;
+  color: #222;
+}
+
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+
+.connected-navbar {
+  width: 100%;
+  height: 70px;
+  padding: 0 48px;
+  background: #ffffff;
+  border-bottom: 1px solid #f4dce7;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  box-sizing: border-box;
+}
+
+.connected-logo {
+  color: #222;
+  font-size: 24px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.connected-logo span {
+  color: #e84d8a;
+}
+
+.connected-back-btn {
+  color: #e84d8a;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+
+  padding: 10px 18px;
+  border-radius: 25px;
+
+  transition: 0.2s ease;
+}
+
+.connected-back-btn:hover {
+  background: #fff0f6;
+}
+
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.connected-main {
+  width: 100%;
+  max-width: 1180px;
+
+  margin: 0 auto;
+  padding: 65px 30px 80px;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.connected-header {
+  text-align: center;
+  margin-bottom: 45px;
+}
+
+.connected-eyebrow {
+  display: inline-block;
+
+  margin-bottom: 12px;
+
+  color: #e84d8a;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.connected-header h1 {
+  margin: 0 0 10px;
+
+  color: #111;
+
+  font-size: 42px;
+  font-weight: 750;
+  line-height: 1.15;
+}
+
+.connected-header p {
+  margin: 0;
+
+  color: #777;
+
+  font-size: 17px;
+}
+
+
+/* =========================================================
+   COUNT
+   ========================================================= */
+
+.connected-count {
+  margin-bottom: 25px;
+
+  text-align: center;
+
+  color: #555;
+
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.connected-count span {
+  margin-right: 5px;
+}
+
+
+/* =========================================================
+   GRID
+   ========================================================= */
+
+.connected-grid {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 24px;
+}
+
+
+/* =========================================================
+   CARD
+   ========================================================= */
+
+.connected-card {
+  width: 100%;
+
+  padding: 30px 26px 25px;
+
+  background: #ffffff;
+
+  border: 1px solid #f1dce6;
+
+  border-radius: 22px;
+
+  box-sizing: border-box;
+
+  text-align: center;
+
+  box-shadow: 0 10px 30px rgba(210, 80, 130, 0.07);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.connected-card:hover {
+  transform: translateY(-5px);
+
+  box-shadow:
+    0 16px 38px rgba(210, 80, 130, 0.13);
+}
+
+
+/* =========================================================
+   AVATAR
+   ========================================================= */
+
+.connected-avatar {
+  width: 72px;
+  height: 72px;
+
+  margin: 0 auto 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #fde7f0;
+
+  border: 1px solid #f7cedf;
+
+  border-radius: 50%;
+
+  font-size: 34px;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.connected-status {
+  display: inline-flex;
+
+  align-items: center;
+  gap: 7px;
+
+  margin-bottom: 13px;
+  padding: 7px 13px;
+
+  background: #edfbf4;
+
+  color: #26a866;
+
+  border-radius: 30px;
+
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.connected-status span {
+  width: 7px;
+  height: 7px;
+
+  display: block;
+
+  background: #35bb75;
+
+  border-radius: 50%;
+}
+
+
+/* =========================================================
+   NAME
+   ========================================================= */
+
+.connected-name {
+  margin: 0 0 7px;
+
+  color: #252525;
+
+  font-size: 21px;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   ROLE
+   ========================================================= */
+
+.connected-role {
+  margin: 0 0 6px;
+
+  color: #e84d8a;
+
+  font-size: 15px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   LOCATION
+   ========================================================= */
+
+.connected-location {
+  margin: 0;
+
+  color: #777;
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   ABOUT
+   ========================================================= */
+
+.connected-about {
+  margin-top: 22px;
+  padding-top: 18px;
+
+  border-top: 1px solid #f4e5eb;
+}
+
+.connected-about span {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #999;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 1.5px;
+}
+
+.connected-about p {
+  min-height: 42px;
+
+  margin: 0;
+
+  color: #555;
+
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.connected-actions {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 10px;
+
+  margin-top: 24px;
+}
+
+
+/* CHAT */
+
+.connected-chat-btn {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 44px;
+
+  padding: 10px 12px;
+
+  background: #e84d8a;
+
+  color: #ffffff;
+
+  border: 1px solid #e84d8a;
+  border-radius: 12px;
+
+  box-sizing: border-box;
+
+  font-size: 13px;
+  font-weight: 650;
+
+  text-decoration: none;
+
+  transition: 0.2s ease;
+}
+
+.connected-chat-btn:hover {
+  background: #d93d78;
+  border-color: #d93d78;
+}
+
+
+/* PROFILE */
+
+.connected-profile-btn {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 44px;
+
+  padding: 10px 12px;
+
+  background: #ffffff;
+
+  color: #e84d8a;
+
+  border: 1px solid #f0b8d0;
+  border-radius: 12px;
+
+  box-sizing: border-box;
+
+  font-size: 13px;
+  font-weight: 650;
+
+  text-decoration: none;
+
+  transition: 0.2s ease;
+}
+
+.connected-profile-btn:hover {
+  background: #fff0f6;
+}
+
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.connected-loading {
+  max-width: 500px;
+
+  margin: 30px auto;
+
+  padding: 45px 25px;
+
+  background: #ffffff;
+
+  border: 1px solid #f1dce6;
+
+  border-radius: 22px;
+
+  text-align: center;
+
+  box-sizing: border-box;
+}
+
+.connected-loading-icon {
+  margin-bottom: 12px;
+
+  font-size: 38px;
+}
+
+.connected-loading h3 {
+  margin: 0 0 7px;
+
+  color: #333;
+
+  font-size: 19px;
+}
+
+.connected-loading p {
+  margin: 0;
+
+  color: #888;
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   EMPTY
+   ========================================================= */
+
+.connected-empty {
+  max-width: 600px;
+
+  margin: 0 auto;
+
+  padding: 55px 30px;
+
+  background: #ffffff;
+
+  border: 1px solid #f1dce6;
+
+  border-radius: 22px;
+
+  text-align: center;
+
+  box-sizing: border-box;
+}
+
+.connected-empty-icon {
+  margin-bottom: 15px;
+
+  font-size: 45px;
+}
+
+.connected-empty h2 {
+  margin: 0 0 10px;
+
+  color: #292929;
+
+  font-size: 23px;
+}
+
+.connected-empty p {
+  margin: 0 auto 24px;
+
+  max-width: 450px;
+
+  color: #777;
+
+  line-height: 1.6;
+}
+
+.connected-primary-btn {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 13px 23px;
+
+  background: #e84d8a;
+
+  color: #ffffff;
+
+  border-radius: 12px;
+
+  font-size: 14px;
+  font-weight: 650;
+
+  text-decoration: none;
+
+  transition: 0.2s ease;
+}
+
+.connected-primary-btn:hover {
+  background: #d93d78;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .connected-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .connected-header h1 {
+    font-size: 36px;
+  }
+
+}
+
+
+@media (max-width: 650px) {
+
+  .connected-navbar {
+    height: 64px;
+    padding: 0 18px;
+  }
+
+  .connected-logo {
+    font-size: 20px;
+  }
+
+  .connected-back-btn {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+
+  .connected-main {
+    padding: 45px 16px 60px;
+  }
+
+  .connected-header {
+    margin-bottom: 35px;
+  }
+
+  .connected-header h1 {
+    font-size: 30px;
+  }
+
+  .connected-header p {
+    font-size: 15px;
+  }
+
+  .connected-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .connected-card {
+    max-width: 430px;
+    margin: 0 auto;
+  }
+
+}
+
+
+@media (max-width: 420px) {
+
+  .connected-logo {
+    font-size: 18px;
+  }
+
+  .connected-back-btn {
+    font-size: 12px;
+  }
+
+  .connected-header h1 {
+    font-size: 27px;
+  }
+
+  .connected-actions {
+    grid-template-columns: 1fr;
+  }
+
+}
+/* =========================
+   LOGOUT BUTTON - FINAL
+========================= */
+
+.logout-btn {
+  border: 1px solid #ed6fa3;
+  background: #ffffff;
+  color: #a64d70;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logout-btn:hover {
+  background: #ed6fa3;
+  color: #ffffff;
+  border-color: #ed6fa3;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(237, 111, 163, 0.2);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .logout-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+}
