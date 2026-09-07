@@ -5499,7 +5499,7 @@ a {
 
   gap: 24px;
 
-  box.connected-dashboard-sizing: border-box;
+ box-sizing: border-box;
 }
 /* =========================================================
    FINAL DASHBOARD WIDTH FIX
@@ -5576,8 +5576,11 @@ body,
    ========================================================= */
 
 -section {
-  width: 100%;.connected-dashboard
+
+  width: 100%;
+
   max-width: 100%;
+
   box-sizing: border-box;
 }
 

@@ -40,7 +40,7 @@ function Dashboard() {
       // -------------------------------------------------
 
       const userResponse = await fetch(
-        `http://localhost:5000/api/users/${userId}`
+        `https://backend-production-c6c1.up.railway.app/api/users/${userId}`
       );
 
       if (!userResponse.ok) {
@@ -63,7 +63,7 @@ function Dashboard() {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/preferences/${userId}`
+          `https://backend-production-c6c1.up.railway.app/api/preferences/${userId}`
         );
 
         const data = await response.json();
@@ -111,7 +111,7 @@ function Dashboard() {
       setMatchesLoading(true);
 
       const response = await fetch(
-        `http://localhost:5000/api/matches/${userId}`
+        `https://backend-production-c6c1.up.railway.app/api/matches/${userId}`
       );
 
       const data = await response.json();
@@ -138,7 +138,7 @@ function Dashboard() {
       setConnectionsLoading(true);
 
       const response = await fetch(
-        `http://localhost:5000/api/connections/${userId}`
+        `https://backend-production-c6c1.up.railway.app/api/connections/${userId}`
       );
 
       const data = await response.json();
@@ -200,7 +200,7 @@ function Dashboard() {
         uniqueUserIds.map(async (roommateId) => {
           try {
             const response = await fetch(
-              `http://localhost:5000/api/users/${roommateId}`
+              `https://backend-production-c6c1.up.railway.app/api/users/${roommateId}`
             );
 
             if (!response.ok) {
@@ -249,7 +249,7 @@ function Dashboard() {
       setMessagesLoading(true);
 
       const response = await fetch(
-        `http://localhost:5000/api/chat/count/${userId}`
+        `https://backend-production-c6c1.up.railway.app/api/chat/count/${userId}`
       );
 
       const data = await response.json();

@@ -93,7 +93,7 @@ function MatchDetails() {
         // ---------------------------------------------
 
         const matchesResponse = await fetch(
-          `http://localhost:5000/api/matches/${userId}`
+          `https://backend-production-c6c1.up.railway.app/api/matches/${userId}`
         );
 
         if (!matchesResponse.ok) {
@@ -130,7 +130,7 @@ function MatchDetails() {
         try {
           const preferencesResponse =
             await fetch(
-              `http://localhost:5000/api/preferences/${userId}`
+              `https://backend-production-c6c1.up.railway.app/api/preferences/${userId}`
             );
 
           if (preferencesResponse.ok) {
@@ -160,7 +160,7 @@ function MatchDetails() {
         try {
           const connectionResponse =
             await fetch(
-              `http://localhost:5000/api/connections/${userId}`
+              `https://backend-production-c6c1.up.railway.app/api/connections/${userId}`
             );
 
           if (connectionResponse.ok) {
@@ -238,7 +238,7 @@ function MatchDetails() {
       setConnectionLoading(true);
 
       const response = await fetch(
-        "http://localhost:5000/api/connections",
+        "https://backend-production-c6c1.up.railway.app/api/connections",
         {
           method: "POST",
 

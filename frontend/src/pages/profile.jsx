@@ -45,7 +45,7 @@ function Profile() {
         // --------------------------------------------------
 
         const userResponse = await fetch(
-          `http://localhost:5000/api/users/${userId}`
+          `https://backend-production-c6c1.up.railway.app/api/users/${userId}`
         );
 
         const userData = await userResponse.json();
@@ -63,7 +63,7 @@ function Profile() {
         // --------------------------------------------------
 
         const preferenceResponse = await fetch(
-          `http://localhost:5000/api/preferences/${userId}`
+          `https://backend-production-c6c1.up.railway.app/api/preferences/${userId}`
         );
 
         const preferenceData = await preferenceResponse.json();
@@ -176,7 +176,7 @@ function Profile() {
       // ==================================================
 
       const userResponse = await fetch(
-        `http://localhost:5000/api/users/${userId}`,
+        `https://backend-production-c6c1.up.railway.app/api/users/${userId}`,
         {
           method: "PUT",
 
@@ -207,7 +207,7 @@ function Profile() {
       // ==================================================
 
       const preferenceResponse = await fetch(
-        `http://localhost:5000/api/preferences/${userId}`,
+        `https://backend-production-c6c1.up.railway.app/api/preferences/${userId}`,
         {
           method: "PUT",
 

@@ -34,7 +34,7 @@ function Notifications() {
       setError("");
 
       const response = await fetch(
-        `http://localhost:5000/api/connections/${userId}`
+        `https://backend-production-c6c1.up.railway.app/api/connections/${userId}`
       );
 
       if (!response.ok) {
@@ -175,7 +175,7 @@ function Notifications() {
       setActionLoading(connectionId);
 
       const response = await fetch(
-        `http://localhost:5000/api/connections/${connectionId}`,
+        `https://backend-production-c6c1.up.railway.app/api/connections/${connectionId}`,
         {
           method: "PUT",
 

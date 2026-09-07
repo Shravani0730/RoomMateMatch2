@@ -21,7 +21,7 @@ function ConnectedRoommates() {
       setLoading(true);
 
       const response = await fetch(
-        `http://localhost:5000/api/connections/${userId}`
+        `https://backend-production-c6c1.up.railway.app/api/connections/${userId}`
       );
 
       const data = await response.json();
@@ -58,7 +58,7 @@ function ConnectedRoommates() {
         uniqueUserIds.map(async (roommateId) => {
           try {
             const userResponse = await fetch(
-              `http://localhost:5000/api/users/${roommateId}`
+              `https://backend-production-c6c1.up.railway.app/api/users/${roommateId}`
             );
 
             const userData = await userResponse.json();

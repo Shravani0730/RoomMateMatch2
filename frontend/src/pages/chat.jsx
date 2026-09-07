@@ -83,7 +83,7 @@ function Chat() {
       // -------------------------------------------------
 
       const userResponse = await fetch(
-        `http://localhost:5000/api/users/${chatUserId}`
+        `https://backend-production-c6c1.up.railway.app/api/users/${chatUserId}`
       );
 
       if (!userResponse.ok) {
@@ -108,7 +108,7 @@ function Chat() {
       // -------------------------------------------------
 
       const messagesResponse = await fetch(
-        `http://localhost:5000/api/chat/${userId}/${chatUserId}`
+        `https://backend-production-c6c1.up.railway.app/api/chat/${userId}/${chatUserId}`
       );
 
       if (!messagesResponse.ok) {
@@ -170,7 +170,7 @@ function Chat() {
       setSending(true);
 
       const response = await fetch(
-        "http://localhost:5000/api/chat",
+        "https://backend-production-c6c1.up.railway.app/api/chat",
         {
           method: "POST",
 

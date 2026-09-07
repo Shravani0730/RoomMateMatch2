@@ -287,7 +287,7 @@ function Quiz() {
 
 
       const response = await fetch(
-        `http://localhost:5000/api/preferences/${userId}`,
+        `https://backend-production-c6c1.up.railway.app/api/preferences/${userId}`,
         {
           method: "PUT",
 

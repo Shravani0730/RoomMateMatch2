@@ -16,7 +16,7 @@ function Matches() {
       return;
     }
 
-    fetch(`http://localhost:5000/api/matches/${userId}`)
+    fetch(`https://backend-production-c6c1.up.railway.app/api/matches/${userId}`)
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
